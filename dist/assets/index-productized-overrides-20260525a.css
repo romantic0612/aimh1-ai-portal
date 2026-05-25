@@ -1,0 +1,26 @@
+/* 20260525a productized portal fusion overrides */
+:root{--portal-deep:#04251a;--portal-green:#08734f;--portal-light:#f0fbf5}
+.topbar{min-height:68px;background:rgba(255,255,255,.86);border-bottom:1px solid rgba(8,115,79,.13);box-shadow:0 10px 30px rgba(8,49,34,.05)}
+.brand-wordmark{height:44px!important;max-width:230px!important}
+.brand .product-name{color:var(--portal-green);font-size:20px}
+.main-nav{background:rgba(240,251,245,.72);border-color:rgba(8,115,79,.13)}
+.main-nav a:hover,.main-nav button:hover,.main-nav a.active{background:linear-gradient(135deg,#07543a,#18a271);color:#fff}
+.profile-button{border-color:rgba(8,115,79,.18);box-shadow:0 8px 24px rgba(8,115,79,.07)}
+.home-main{background:linear-gradient(180deg,#f7fcf9 0,#eef8f2 58%,#fff 100%)}
+.hero{background:var(--portal-deep);min-height:540px}
+.hero-media{background:linear-gradient(90deg,rgba(4,37,26,.88),rgba(4,37,26,.64) 44%,rgba(4,37,26,.18)),linear-gradient(180deg,rgba(4,37,26,.05),rgba(4,37,26,.38)),url(/background.jpg) center 46%/cover no-repeat}
+.hero:after{content:"";position:absolute;inset:0;opacity:.24;background-image:linear-gradient(rgba(255,255,255,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.2) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(90deg,#000,transparent 78%)}
+.hero-inner{position:relative;z-index:1;display:grid;align-content:center;justify-items:center;text-align:center;width:min(1200px,calc(100% - 40px));padding:42px 0 54px}
+.hero-copy{max-width:760px;text-align:center}
+.hero-copy:before{content:"AHU AI PORTAL";display:inline-flex;align-items:center;min-height:30px;margin-bottom:14px;padding:0 13px;border:1px solid rgba(191,244,218,.32);border-radius:999px;background:rgba(6,61,43,.42);color:#c8f7df;font-size:13px;font-weight:900}
+.hero h1{font-size:clamp(36px,5vw,62px);font-weight:900;line-height:1.06}
+.hero p{max-width:62ch;margin-inline:auto;color:#e7f5ed;font-size:16px;line-height:1.82}
+.hero .ask-box{width:min(900px,100%);margin-top:30px;border:1px solid rgba(191,244,218,.26);border-radius:18px;background:rgba(255,255,255,.92);box-shadow:0 24px 70px rgba(0,0,0,.22)}
+.ask-icon{border-radius:12px;background:#e0f6e9}
+.ask-box button{border-radius:12px;background:linear-gradient(135deg,#08734f,#18a271)}
+.dual-ranking-panel{margin-top:16px}
+.ranking-board{border-radius:8px;border-color:rgba(8,115,79,.13);box-shadow:0 18px 44px rgba(8,49,34,.08)}
+.board-icon{border-radius:18px}
+.home-footer{color:#466058;text-shadow:none}
+@media (min-width:981px){.page:has(.home-main){height:auto;overflow:auto}.home-main{height:auto;min-height:calc(100vh - 68px);overflow:visible;padding-bottom:24px}.hero{min-height:min(620px,calc(100vh - 190px))}.ranking-panel.dual-ranking-panel{width:min(1320px,calc(100% - 64px))}}
+@media (max-width:640px){.hero-inner{width:min(100% - 24px,1200px);padding:30px 0 34px}.hero h1{font-size:34px}.brand-wordmark{height:34px!important;max-width:150px!important}}

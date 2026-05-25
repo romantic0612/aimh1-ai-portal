@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIMH1 后台观测台</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #eef5f1;
+        --panel: #ffffff;
+        --panel-2: #f7fbf8;
+        --text: #13251e;
+        --muted: #64756d;
+        --line: #d9e8df;
+        --green: #08734f;
+        --green-2: #18a271;
+        --amber: #c9861a;
+        --red: #cf3e2e;
+        --shadow: 0 18px 48px rgba(13, 58, 39, 0.11);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--text);
+        background: linear-gradient(180deg, #f8fcf9, var(--bg));
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      }
+      button, input, select { font: inherit; }
+      button { cursor: pointer; }
+      .shell { min-height: 100vh; }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 66px;
+        padding: 10px clamp(16px, 3vw, 40px);
+        border-bottom: 1px solid var(--line);
+        background: rgba(255,255,255,.88);
+        backdrop-filter: blur(14px);
+      }
+      .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+      .brand img { width: 168px; height: 40px; object-fit: contain; object-position: left center; }
+      .brand strong { color: var(--green); font-size: 19px; white-space: nowrap; }
+      .top-actions { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+      .btn {
+        min-height: 38px;
+        padding: 0 13px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--panel);
+        color: var(--green);
+        font-weight: 800;
+      }
+      .btn.primary { border-color: var(--green); background: var(--green); color: #fff; }
+      main { width: min(1500px, calc(100% - 32px)); margin: 22px auto 40px; }
+      .filters {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .tabs, .searchbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .tabs button, .searchbar input, .searchbar select {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--panel);
+        padding: 0 13px;
+        color: var(--text);
+      }
+      .tabs button.active { background: var(--green); border-color: var(--green); color: #fff; }
+      .searchbar input { width: min(360px, 80vw); }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .stat-card, .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 10px 28px rgba(18, 38, 28, .06);
+      }
+      .stat-card { display: grid; gap: 6px; padding: 16px; min-height: 104px; }
+      .stat-card span { color: var(--muted); font-size: 13px; font-weight: 800; }
+      .stat-card strong { color: var(--green); font-size: 27px; line-height: 1; }
+      .dashboard {
+        display: grid;
+        grid-template-columns: minmax(280px, .8fr) minmax(440px, 1.35fr) minmax(360px, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+      .panel { min-width: 0; overflow: hidden; }
+      .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      .panel-head h2 { margin: 0; font-size: 17px; }
+      .panel-head span { color: var(--muted); font-size: 12px; font-weight: 800; }
+      .list { display: grid; max-height: calc(100vh - 300px); overflow: auto; }
+      .item {
+        display: grid;
+        gap: 5px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+        background: #fff;
+        text-align: left;
+      }
+      button.item { border-left: 0; border-right: 0; border-top: 0; color: inherit; }
+      button.item:hover, button.item.active { background: var(--panel-2); }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .item strong { font-size: 14px; line-height: 1.35; }
+      .item p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: #e9f7ef;
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+      .badge.error { background: #ffe8e4; color: var(--red); }
+      .badge.warn { background: #fff3d6; color: var(--amber); }
+      .detail { padding: 16px; display: grid; gap: 14px; }
+      .detail h3 { margin: 0; font-size: 16px; }
+      .kv { display: grid; gap: 8px; }
+      .kv div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--line); padding-bottom: 7px; color: var(--muted); font-size: 13px; }
+      .messages { display: grid; gap: 10px; max-height: 360px; overflow: auto; }
+      .message { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); }
+      .message.user { background: #eef9f2; border-color: #bbdfc8; }
+      .message strong { display: block; margin-bottom: 5px; color: var(--green); font-size: 12px; }
+      .message p { margin: 0; color: var(--text); font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+      .empty, .error { padding: 18px; color: var(--muted); font-size: 13px; }
+      .error { color: var(--red); }
+      @media (max-width: 1180px) {
+        .stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .dashboard { grid-template-columns: 1fr; }
+        .list { max-height: none; }
+      }
+      @media (max-width: 640px) {
+        .brand img { width: 132px; }
+        .brand strong { font-size: 16px; }
+        .topbar { align-items: flex-start; flex-direction: column; }
+        .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .stat-card strong { font-size: 23px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <img src="/文化标识.png" alt="安徽农业大学" />
+          <strong>农芯智后台观测台</strong>
+        </div>
+        <div class="top-actions">
+          <span id="adminUser">正在校验权限...</span>
+          <button class="btn" id="homeBtn" type="button">返回门户</button>
+          <button class="btn primary" id="refreshBtn" type="button">刷新</button>
+        </div>
+      </header>
+
+      <main>
+        <div class="filters">
+          <div class="tabs" aria-label="时间范围">
+            <button data-range="today" class="active" type="button">今日</button>
+            <button data-range="7d" type="button">近 7 天</button>
+            <button data-range="30d" type="button">近 30 天</button>
+          </div>
+          <div class="searchbar">
+            <input id="keyword" type="search" placeholder="搜索问题关键词" />
+            <select id="statusFilter" aria-label="运行状态">
+              <option value="">全部状态</option>
+              <option value="success">成功</option>
+              <option value="error">失败</option>
+            </select>
+            <span id="lastRefresh">尚未刷新</span>
+          </div>
+        </div>
+
+        <section class="stat-grid" id="stats"></section>
+
+        <section class="dashboard">
+          <section class="panel">
+            <div class="panel-head"><h2>最近访问</h2><span id="visitCount">0</span></div>
+            <div class="list" id="visits"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head"><h2>最近问题</h2><span id="questionCount">0</span></div>
+            <div class="list" id="questions"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head"><h2>详情与热门问题</h2><span>15 秒自动刷新</span></div>
+            <div class="detail" id="detail"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const state = { range: "today", selectedSessionId: "", timer: null };
+      const $ = (id) => document.getElementById(id);
+      const fmt = (value) => {
+        if (!value) return "-";
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("zh-CN", { hour12: false });
+      };
+      const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[char]));
+      const number = (value) => Number(value || 0).toLocaleString("zh-CN");
+
+      async function api(path) {
+        const response = await fetch(path, { credentials: "include" });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.success === false) throw new Error(data.message || `请求失败：${response.status}`);
+        return data;
+      }
+
+      function renderStats(stats) {
+        const items = [
+          ["访问次数", stats.visits],
+          ["活跃用户", stats.activeUsers],
+          ["提问次数", stats.questions],
+          ["有效回答", stats.effectiveRuns],
+          ["失败调用", stats.errorRuns],
+          ["Token", stats.totalTokens]
+        ];
+        $("stats").innerHTML = items.map(([label, value]) => `
+          <article class="stat-card"><span>${esc(label)}</span><strong>${number(value)}</strong></article>
+        `).join("");
+      }
+
+      function renderVisits(items) {
+        $("visitCount").textContent = `${items.length} 人`;
+        $("visits").innerHTML = items.length ? items.map((item) => `
+          <article class="item">
+            <div class="row"><strong>${esc(item.userName || item.userId)}</strong><span class="badge">${esc(item.userRole || "-")}</span></div>
+            <p>${esc(item.college || "学院/部门未知")} · ${number(item.visitCount)} 次访问</p>
+            <p>最近：${fmt(item.lastVisitAt)}</p>
+          </article>
+        `).join("") : `<div class="empty">暂无访问记录。</div>`;
+      }
+
+      function renderQuestions(items) {
+        $("questionCount").textContent = `${items.length} 条`;
+        $("questions").innerHTML = items.length ? items.map((item) => `
+          <button class="item ${item.sessionId === state.selectedSessionId ? "active" : ""}" data-session="${esc(item.sessionId)}" type="button">
+            <div class="row">
+              <strong>${esc(item.question || "空问题")}</strong>
+              <span class="badge ${item.status === "success" ? "" : "error"}">${esc(item.status || "-")}</span>
+            </div>
+            <p>${esc(item.userName || item.userId || "未知用户")} · ${esc(item.toolName || item.intentLabel || "默认模型")}</p>
+            <p>${fmt(item.startedAt)} · ${number(item.latencyMs)} ms</p>
+          </button>
+        `).join("") : `<div class="empty">暂无提问记录。</div>`;
+        document.querySelectorAll("[data-session]").forEach((node) => {
+          node.addEventListener("click", () => loadDetail(node.dataset.session));
+        });
+      }
+
+      function renderTopQuestions(items) {
+        return `
+          <div class="kv">
+            ${items.slice(0, 8).map((item) => `
+              <div><span>${esc(item.question)}</span><strong>${number(item.count)}</strong></div>
+            `).join("") || `<div><span>暂无热门问题</span><strong>-</strong></div>`}
+          </div>
+        `;
+      }
+
+      async function loadDetail(sessionId) {
+        state.selectedSessionId = sessionId;
+        $("detail").innerHTML = `<div class="empty">正在加载会话详情...</div>`;
+        try {
+          const data = await api(`/api/admin/session-detail?sessionId=${encodeURIComponent(sessionId)}`);
+          const session = data.session || {};
+          $("detail").innerHTML = `
+            <h3>${esc(session.title || "会话详情")}</h3>
+            <div class="kv">
+              <div><span>用户</span><strong>${esc(session.userName || session.userId || "-")}</strong></div>
+              <div><span>角色</span><strong>${esc(session.userRole || "-")}</strong></div>
+              <div><span>最近消息</span><strong>${fmt(session.lastMessageAt)}</strong></div>
+              <div><span>运行次数</span><strong>${number((data.runs || []).length)}</strong></div>
+            </div>
+            <div class="messages">
+              ${(data.messages || []).map((message) => `
+                <article class="message ${message.role === "user" ? "user" : ""}">
+                  <strong>${message.role === "user" ? "用户" : "农芯智 AI"} · ${fmt(message.createdAt)}</strong>
+                  <p>${esc(message.content)}</p>
+                </article>
+              `).join("") || `<div class="empty">暂无消息。</div>`}
+            </div>
+          `;
+          await loadAll(false);
+        } catch (error) {
+          $("detail").innerHTML = `<div class="error">${esc(error.message)}</div>`;
+        }
+      }
+
+      async function loadAll(resetDetail = true) {
+        const keyword = $("keyword").value.trim();
+        const status = $("statusFilter").value;
+        const query = new URLSearchParams({ range: state.range, limit: "100" });
+        if (keyword) query.set("keyword", keyword);
+        if (status) query.set("status", status);
+
+        try {
+          const [session, overview, visits, questions, top] = await Promise.all([
+            api("/api/admin/session"),
+            api(`/api/admin/overview?range=${state.range}`),
+            api(`/api/admin/visits?range=${state.range}&limit=100`),
+            api(`/api/admin/questions?${query.toString()}`),
+            api(`/api/admin/question-top?range=${state.range}&limit=50`)
+          ]);
+          $("adminUser").textContent = `${session.user.name || session.user.user_id} · 管理员`;
+          renderStats(overview.stats || {});
+          renderVisits(visits.visits || []);
+          renderQuestions(questions.questions || []);
+          if (resetDetail || !state.selectedSessionId) {
+            $("detail").innerHTML = `<h3>热门问题</h3>${renderTopQuestions(top.items || [])}`;
+          }
+          $("lastRefresh").textContent = `最后刷新：${new Date().toLocaleTimeString("zh-CN", { hour12: false })}`;
+        } catch (error) {
+          if (error.message.includes("登录")) {
+            $("detail").innerHTML = `<div class="error">请先登录后再访问后台。</div>`;
+          } else {
+            $("detail").innerHTML = `<div class="error">${esc(error.message)}</div>`;
+          }
+        }
+      }
+
+      document.querySelectorAll("[data-range]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll("[data-range]").forEach((item) => item.classList.remove("active"));
+          button.classList.add("active");
+          state.range = button.dataset.range;
+          state.selectedSessionId = "";
+          loadAll(true);
+        });
+      });
+      $("refreshBtn").addEventListener("click", () => loadAll(true));
+      $("homeBtn").addEventListener("click", () => { window.location.href = "/"; });
+      $("keyword").addEventListener("keydown", (event) => { if (event.key === "Enter") loadAll(true); });
+      $("statusFilter").addEventListener("change", () => loadAll(true));
+      loadAll(true);
+      state.timer = setInterval(() => loadAll(false), 15000);
+    </script>
+  </body>
+</html>

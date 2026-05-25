@@ -1,0 +1,21 @@
+services:
+  aimh1-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aimh1-ai-portal:latest
+    container_name: aimh1-portal
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: production
+      PORT: "7998"
+    ports:
+      - "7998:7998"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:7998/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
