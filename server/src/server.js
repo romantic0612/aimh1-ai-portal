@@ -117,14 +117,17 @@ const config = {
   difyRenshiBaseUrl: (process.env.DIFY_RENSHI_BASE_URL || "").replace(/\/$/, ""),
   difyLibraryBaseUrl: (process.env.DIFY_LIBRARY_BASE_URL || "").replace(/\/$/, ""),
   difyNongxiaoxinBaseUrl: (process.env.DIFY_NONGXIAOXIN_BASE_URL || "").replace(/\/$/, ""),
+  difyXgBaseUrl: (process.env.DIFY_XG_BASE_URL || process.env.DIFY_NONGXIAOXIN_BASE_URL || "").replace(/\/$/, ""),
   difyJiaowuApiKey: process.env.DIFY_JIAOWU_API_KEY || "",
   difyRenshiApiKey: process.env.DIFY_RENSHI_API_KEY || "",
   difyLibraryApiKey: process.env.DIFY_LIBRARY_API_KEY || "",
   difyNongxiaoxinApiKey: process.env.DIFY_NONGXIAOXIN_API_KEY || "",
+  difyXgApiKey: process.env.DIFY_XG_API_KEY || process.env.DIFY_NONGXIAOXIN_API_KEY || "",
   difyJiaowuChatUrl: (process.env.DIFY_JIAOWU_CHAT_URL || "").replace(/\/$/, ""),
   difyRenshiChatUrl: (process.env.DIFY_RENSHI_CHAT_URL || "").replace(/\/$/, ""),
   difyLibraryChatUrl: (process.env.DIFY_LIBRARY_CHAT_URL || "").replace(/\/$/, ""),
   difyNongxiaoxinChatUrl: (process.env.DIFY_NONGXIAOXIN_CHAT_URL || "").replace(/\/$/, ""),
+  difyXgChatUrl: (process.env.DIFY_XG_CHAT_URL || process.env.DIFY_NONGXIAOXIN_CHAT_URL || "").replace(/\/$/, ""),
   difyConnectTimeoutMs: Number(process.env.DIFY_CONNECT_TIMEOUT_MS || Number(process.env.DIFY_CONNECT_TIMEOUT || 15) * 1000),
   difyReadTimeoutMs: Number(process.env.DIFY_READ_TIMEOUT_MS || Number(process.env.DIFY_READ_TIMEOUT || 600) * 1000),
   difyMaxConcurrent: positiveInteger(process.env.DIFY_MAX_CONCURRENT, 10),
@@ -681,9 +684,8 @@ async function ensureAnalyticsColumns() {
 function getIntentLabel(agent) {
   const mapping = {
     jiaowu: "academic_affairs",
-    renshi: "hr_service",
     library: "library_resource",
-    nongxiaoxin: "freshman_guide",
+    xg: "student_affairs",
     general: "general_chat"
   };
   return mapping[agent?.id] || "campus_super_agent";
@@ -1016,17 +1018,6 @@ function buildAgent(agentId) {
     };
   }
 
-  if (normalizedAgentId === "renshi") {
-    return {
-      ...registry,
-      id: "renshi",
-      name: "人事智能体",
-      toolName: "call_dify_renshi",
-      apiKey: config.difyRenshiApiKey || config.difyApiKey,
-      chatUrl: resolveDifyChatUrl(config.difyRenshiChatUrl, config.difyRenshiBaseUrl)
-    };
-  }
-
   if (normalizedAgentId === "library") {
     return {
       ...registry,
@@ -1038,15 +1029,14 @@ function buildAgent(agentId) {
     };
   }
 
-  if (normalizedAgentId === "nongxiaoxin") {
+  if (normalizedAgentId === "xg") {
     return {
       ...registry,
-      id: "nongxiaoxin",
-      name: "农小新",
-      toolId: "5fc78d7a-4bf0-405f-bb32-70ea6fbeb1b2",
-      toolName: "call_dify_nongxiaoxin",
-      apiKey: config.difyNongxiaoxinApiKey || config.difyApiKey,
-      chatUrl: resolveDifyChatUrl(config.difyNongxiaoxinChatUrl, config.difyNongxiaoxinBaseUrl)
+      id: "xg",
+      name: "学工智能体",
+      toolName: "call_dify_xg",
+      apiKey: config.difyXgApiKey || config.difyApiKey,
+      chatUrl: resolveDifyChatUrl(config.difyXgChatUrl, config.difyXgBaseUrl)
     };
   }
 
@@ -1181,7 +1171,7 @@ function routeFromPlannerDecision(decision) {
         reason: decision?.reason || "LLM Router 判断用户意图不明确。",
         planner: "llm",
         clarification_question:
-          clarificationQuestion || "我还需要确认一下：你想咨询教务、人事、图书馆业务，还是让我按普通问题帮你处理？"
+          clarificationQuestion || "我还需要确认一下：你想咨询教务、图书馆、学工业务，还是让我按普通问题帮你处理？"
       },
       "llm"
     );
@@ -1241,7 +1231,7 @@ async function callLlmRouter(message) {
             capabilityText,
             "",
             "判断原则：",
-            "1. 如果用户是在写作、润色、总结、翻译、代码解释，即使内容中出现“教务/图书馆/人事/新生向导”等词，也优先 general。",
+            "1. 如果用户是在写作、润色、总结、翻译、代码解释，即使内容中出现“教务/图书馆/学工”等词，也优先 general。",
             "2. 如果用户询问学校业务流程、办理入口、政策、查询、申请、预约，优先对应业务智能体。",
             "3. 如果用户问题同时包含多个业务事项，返回 strategy = \"multi_agent_parallel\"，agents 填多个业务智能体。",
             "4. 如果用户意图不明确，返回 strategy = \"clarify\"。",
@@ -1320,9 +1310,8 @@ async function selectAgent(message, context = {}) {
 function agentIdFromToolName(toolName) {
   const text = String(toolName || "");
   if (text.includes("jiaowu")) return "jiaowu";
-  if (text.includes("renshi")) return "renshi";
   if (text.includes("library")) return "library";
-  if (text.includes("nongxiaoxin")) return "nongxiaoxin";
+  if (text.includes("xg") || text.includes("nongxiaoxin")) return "xg";
   return "";
 }
 
@@ -1335,7 +1324,7 @@ async function getLatestSessionAgent({ sessionId }) {
        LEFT JOIN portal_agent_runs r ON r.run_id = c.run_id
        WHERE c.session_id = ?
          AND c.status = 'success'
-          AND c.tool_name IN ('call_dify_jiaowu', 'call_dify_renshi', 'call_dify_library', 'call_dify_nongxiaoxin')
+          AND c.tool_name IN ('call_dify_jiaowu', 'call_dify_library', 'call_dify_xg', 'call_dify_nongxiaoxin')
          AND (r.status IS NULL OR r.status = 'success')
        ORDER BY COALESCE(c.finished_at, c.created_at) DESC, c.id DESC
        LIMIT 1`,
@@ -1560,7 +1549,7 @@ async function streamGeneralAnswer({ res, message, user, agent }) {
     const answer = [
       "你好，我是农芯智 AI。",
       "",
-      "教务、人事和图书馆相关问题我会自动转给对应智能体；其他普通问题可以直接由模型回答。"
+      "教务、图书馆和学工相关问题我会自动转给对应智能体；其他普通问题可以直接由模型回答。"
     ].join("\n");
     writeSse(res, { type: "answer_chunk", content: answer, tool_name: agent.toolName });
     return { answer, conversation_id: "", usage: normalizeUsage(), response_json: {} };
@@ -1587,7 +1576,7 @@ async function streamGeneralAnswer({ res, message, user, agent }) {
           {
             role: "system",
             content:
-              "你是安徽农业大学 AI 门户的默认模型助手，名叫农芯智 AI。用户问候、闲聊、写作润色、普通知识和未明确属于教务/人事/图书馆业务的问题，由你直接回答。回答要自然、简洁、可靠。涉及学校具体政策、课表、成绩、人事证明、图书借阅、数据库资源等实时或专门业务时，提醒用户可以继续提出具体问题，系统会转给对应智能体；不要编造学校内部数据。"
+              "你是安徽农业大学 AI 门户的默认模型助手，名叫农芯智 AI。用户问候、闲聊、写作润色、普通知识和未明确属于教务/图书馆/学工业务的问题，由你直接回答。回答要自然、简洁、可靠。涉及学校具体政策、课表、成绩、图书借阅、数据库资源、学生事务等实时或专门业务时，提醒用户可以继续提出具体问题，系统会转给对应智能体；不要编造学校内部数据。"
           },
           {
             role: "user",
@@ -2415,7 +2404,7 @@ app.post("/api/chat/stream", requireLogin, async (req, res) => {
 
     if (route.strategy === "clarify") {
       const clarification =
-        route.clarification_question || route.message || "我还需要确认一下：你想咨询教务、人事、图书馆业务，还是让我按普通问题帮你处理？";
+        route.clarification_question || route.message || "我还需要确认一下：你想咨询教务、图书馆、学工业务，还是让我按普通问题帮你处理？";
       writeSse(res, {
         type: "answer_chunk",
         content: clarification,

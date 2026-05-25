@@ -35,27 +35,27 @@ const cases = [
   {
     message: "怎么开在职证明",
     strategy: "single_agent",
-    agentIds: ["renshi"]
+    agentIds: ["general"]
   },
   {
     message: "职称评审材料怎么提交",
     strategy: "single_agent",
-    agentIds: ["renshi"]
+    agentIds: ["general"]
   },
   {
     message: "报到要带什么东西？",
     strategy: "single_agent",
-    agentIds: ["nongxiaoxin"]
+    agentIds: ["xg"]
   },
   {
     message: "安农大在哪坐地铁？宿舍是几人间？有空调吗？",
     strategy: "single_agent",
-    agentIds: ["nongxiaoxin"]
+    agentIds: ["xg"]
   },
   {
     message: "宿舍门禁几点",
     strategy: "single_agent",
-    agentIds: ["nongxiaoxin"]
+    agentIds: ["xg"]
   },
   {
     message: "我想查论文数据库，还想问毕业学分要求",
