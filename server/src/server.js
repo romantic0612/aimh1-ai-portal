@@ -3378,13 +3378,21 @@ app.get("/callback", (req, res, next) => {
 
 const distDir = path.resolve(projectRoot, "dist");
 if (fs.existsSync(distDir)) {
+  const sendPortalIndex = (req, res) => {
+    if (!req.session?.user) {
+      return res.redirect("/api/auth/login");
+    }
+    return res.sendFile(path.join(distDir, "index.html"));
+  };
+
+  app.get(["/", "/index.html"], sendPortalIndex);
   app.use(express.static(distDir));
   app.get("/admin", (_req, res) => {
     res.sendFile(path.join(distDir, "admin.html"));
   });
   app.get("*", (req, res, next) => {
     if (req.path.startsWith("/api/")) return next();
-    res.sendFile(path.join(distDir, "index.html"));
+    sendPortalIndex(req, res);
   });
 }
 

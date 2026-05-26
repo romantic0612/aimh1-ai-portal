@@ -260,3 +260,13 @@ pm2 status
 pm2 logs aimh1-portal
 pm2 save
 ```
+
+## GitHub Collaboration
+
+Repository collaborator settings:
+
+```text
+https://github.com/romantic0612/aimh1-ai-portal/settings/access
+```
+
+Use this page to invite teammates as GitHub collaborators. Teammates should work on feature branches and do not need SSH access to the production server.
