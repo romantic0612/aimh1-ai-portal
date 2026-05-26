@@ -3288,92 +3288,110 @@ app.post("/api/auth/logout", (req, res) => {
   });
 });
 
-app.post("/api/auth/exchange", async (req, res) => {
-  const { code, state } = req.body || {};
-  if (!code) return res.status(400).send("Missing required field: code");
+function httpError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
 
+async function completeOAuthExchange(req, { code, state }) {
+  if (!code) throw httpError(400, "Missing required field: code");
   const expectedState = req.session?.oauthState;
   if (expectedState && state && expectedState !== state) {
-    return res.status(400).send("Invalid oauth state");
+    throw httpError(400, "Invalid oauth state");
   }
 
+  const tokenUrl = `${config.authServer}/accessToken`;
+  const form = new URLSearchParams();
+  form.set("grant_type", "authorization_code");
+  form.set("code", code);
+  form.set("client_id", config.clientId);
+  form.set("client_secret", config.clientSecret);
+  form.set("redirect_uri", config.redirectUri);
+
+  const tokenResp = await fetch(tokenUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: form
+  });
+  if (!tokenResp.ok) {
+    const detail = await tokenResp.text();
+    throw httpError(502, `Token exchange failed: ${detail}`);
+  }
+
+  const tokenRawText = await tokenResp.text();
+  const tokenData = parseCasTokenPayload(tokenRawText);
+  const accessToken = tokenData.accessToken;
+  if (!accessToken) {
+    throw httpError(502, `Token response missing access_token: ${tokenRawText}`);
+  }
+
+  const userForm = new URLSearchParams();
+  userForm.set("access_token", accessToken);
+  let userResp = await fetch(config.userinfoEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },
+    body: userForm
+  });
+  if (!userResp.ok) {
+    const fallbackUrl = new URL(config.userinfoEndpoint);
+    fallbackUrl.searchParams.set("access_token", accessToken);
+    userResp = await fetch(fallbackUrl, { method: "GET" });
+  }
+  if (!userResp.ok) {
+    const detail = await userResp.text();
+    throw httpError(502, `User info request failed: ${detail}`);
+  }
+
+  const userRawText = await userResp.text();
+  const userRaw = parseUserInfoText(userRawText);
+  const normalized = normalizeCasUser(userRaw);
+  const user = { ...userRaw, ...normalized };
+
+  req.session.user = user;
+  req.session.accessToken = accessToken;
+  req.session.oauthState = undefined;
+
+  const userStoreResult = await upsertPortalUser(user);
+  const counterResult = await tryIncreaseLoginCounter(user.user_id || user.id);
+
+  return {
+    accessToken,
+    user,
+    userStoreResult,
+    counterResult
+  };
+}
+
+app.post("/api/auth/exchange", async (req, res) => {
   try {
-    const tokenUrl = `${config.authServer}/accessToken`;
-    const form = new URLSearchParams();
-    form.set("grant_type", "authorization_code");
-    form.set("code", code);
-    form.set("client_id", config.clientId);
-    form.set("client_secret", config.clientSecret);
-    form.set("redirect_uri", config.redirectUri);
-
-    const tokenResp = await fetch(tokenUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form
-    });
-    if (!tokenResp.ok) {
-      const detail = await tokenResp.text();
-      return res.status(502).send(`Token exchange failed: ${detail}`);
-    }
-
-    const tokenRawText = await tokenResp.text();
-    const tokenData = parseCasTokenPayload(tokenRawText);
-    const accessToken = tokenData.accessToken;
-    if (!accessToken) {
-      return res.status(502).send(`Token response missing access_token: ${tokenRawText}`);
-    }
-
-    const userForm = new URLSearchParams();
-    userForm.set("access_token", accessToken);
-    let userResp = await fetch(config.userinfoEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },
-      body: userForm
-    });
-    if (!userResp.ok) {
-      const fallbackUrl = new URL(config.userinfoEndpoint);
-      fallbackUrl.searchParams.set("access_token", accessToken);
-      userResp = await fetch(fallbackUrl, { method: "GET" });
-    }
-    if (!userResp.ok) {
-      const detail = await userResp.text();
-      return res.status(502).send(`User info request failed: ${detail}`);
-    }
-
-    const userRawText = await userResp.text();
-    const userRaw = parseUserInfoText(userRawText);
-    const normalized = normalizeCasUser(userRaw);
-    const user = { ...userRaw, ...normalized };
-
-    req.session.user = user;
-    req.session.accessToken = accessToken;
-    req.session.oauthState = undefined;
-
-    const userStoreResult = await upsertPortalUser(user);
-    const counterResult = await tryIncreaseLoginCounter(user.user_id || user.id);
-
-    res.json({
-      accessToken,
-      user,
-      userStoreResult,
-      counterResult
-    });
+    const result = await completeOAuthExchange(req, req.body || {});
+    res.json(result);
   } catch (error) {
-    res.status(500).send(`OAuth flow error: ${error.message}`);
+    res.status(error.status || 500).send(error.status ? error.message : `OAuth flow error: ${error.message}`);
   }
 });
 
-app.get("/callback", (req, res, next) => {
+app.get("/callback", async (req, res, next) => {
   const bridgeState = decodeOAuthBridgeState(req.query.state);
-  if (!bridgeState) return next();
+  if (!bridgeState && !req.query.code) return next();
 
-  if (!isAllowedBridgeReturnUrl(bridgeState.returnTo)) {
+  if (bridgeState && !isAllowedBridgeReturnUrl(bridgeState.returnTo)) {
     return res.status(400).send("OAuth bridge return URL is not allowed");
   }
 
-  const localCallbackUrl = new URL(bridgeState.returnTo);
-  appendOAuthCallbackQuery(localCallbackUrl, req.query);
-  return res.redirect(localCallbackUrl.toString());
+  if (bridgeState) {
+    const localCallbackUrl = new URL(bridgeState.returnTo);
+    appendOAuthCallbackQuery(localCallbackUrl, req.query);
+    return res.redirect(localCallbackUrl.toString());
+  }
+
+  try {
+    await completeOAuthExchange(req, { code: req.query.code, state: req.query.state });
+    return res.redirect("/");
+  } catch (error) {
+    return res.status(error.status || 500).send(error.status ? error.message : `OAuth callback error: ${error.message}`);
+  }
 });
 
 const distDir = path.resolve(projectRoot, "dist");
