@@ -1549,7 +1549,7 @@ async function streamGeneralAnswer({ res, message, user, agent }) {
     const answer = [
       "你好，我是农芯智 AI。",
       "",
-      "教务、图书馆和学工相关问题我会自动转给对应智能体；其他普通问题可以直接由模型回答。"
+      "我可以先回答通用问题。若你要咨询教务、图书馆或学工事务，请点击首页输入框下方对应的智能体按钮，这样会更准确。"
     ].join("\n");
     writeSse(res, { type: "answer_chunk", content: answer, tool_name: agent.toolName });
     return { answer, conversation_id: "", usage: normalizeUsage(), response_json: {} };
@@ -1576,7 +1576,7 @@ async function streamGeneralAnswer({ res, message, user, agent }) {
           {
             role: "system",
             content:
-              "你是安徽农业大学 AI 门户的默认模型助手，名叫农芯智 AI。用户问候、闲聊、写作润色、普通知识和未明确属于教务/图书馆/学工业务的问题，由你直接回答。回答要自然、简洁、可靠。涉及学校具体政策、课表、成绩、图书借阅、数据库资源、学生事务等实时或专门业务时，提醒用户可以继续提出具体问题，系统会转给对应智能体；不要编造学校内部数据。"
+              "你是安徽农业大学 AI 门户的默认模型助手，名叫农芯智 AI。当前用户没有选择首页输入框下方的教务智能体、AI馆员或AI辅导员时，问题会由你直接回答。你适合处理问候、闲聊、写作润色、总结、翻译、代码解释、普通知识和开放性咨询。回答要自然、简洁、可靠。遇到教务、图书馆、学工等校内业务问题时，可以给出通用层面的解释和提问建议，但要提醒用户点击对应智能体按钮获取更准确的业务答复。不要声称系统会自动转交给其他智能体。不要编造具体校内政策、课表、成绩、账号、借阅记录、数据库权限、学生事务办理结果或其他学校内部数据。"
           },
           {
             role: "user",
