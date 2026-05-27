@@ -188,7 +188,8 @@ if (config.mysqlHost && config.mysqlUser && config.mysqlDatabase) {
     password: config.mysqlPassword,
     database: config.mysqlDatabase,
     connectionLimit: config.mysqlPoolSize,
-    charset: "utf8mb4"
+    charset: "utf8mb4",
+    timezone: "Z"
   });
 }
 
@@ -2209,10 +2210,11 @@ app.get("/api/chat/history", requireLogin, async (req, res) => {
     const [rows] = await mysqlPool.query(
       `SELECT
          session_id AS sessionId,
-         COALESCE(NULLIF(title, ''), '新对话') AS sessionTitle,
+         COALESCE(NULLIF(title, ''), CONVERT(0xE696B0E5AFB9E8AF9D USING utf8mb4)) AS sessionTitle,
          created_at AS createTime,
          updated_at AS updateTime,
-         last_message_at AS lastMessageAt
+         last_message_at AS lastMessageAt,
+         DATE_FORMAT(CONVERT_TZ(COALESCE(last_message_at, updated_at, created_at), '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS displayTime
        FROM portal_agent_sessions
        WHERE user_id = ?
        ORDER BY COALESCE(last_message_at, updated_at, created_at) DESC
@@ -2241,7 +2243,7 @@ app.get("/api/chat/history/detail", requireLogin, async (req, res) => {
 
   try {
     const [sessions] = await mysqlPool.query(
-      `SELECT session_id AS sessionId, COALESCE(NULLIF(title, ''), '历史会话') AS sessionTitle
+      `SELECT session_id AS sessionId, COALESCE(NULLIF(title, ''), CONVERT(0xE58E86E58FB2E4BC9AE8AF9D USING utf8mb4)) AS sessionTitle
        FROM portal_agent_sessions
        WHERE session_id = ? AND user_id = ?
        LIMIT 1`,
@@ -2253,7 +2255,8 @@ app.get("/api/chat/history/detail", requireLogin, async (req, res) => {
     }
 
     const [messages] = await mysqlPool.query(
-      `SELECT role, content, created_at AS createTime
+      `SELECT role, content, created_at AS createTime,
+              DATE_FORMAT(CONVERT_TZ(created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS displayTime
        FROM portal_agent_messages
        WHERE session_id = ?
          AND role IN ('user', 'assistant')
@@ -2270,7 +2273,8 @@ app.get("/api/chat/history/detail", requireLogin, async (req, res) => {
         chatList: (messages || []).map((item) => ({
           type: item.role,
           content: item.content || "",
-          createTime: item.createTime
+          createTime: item.createTime,
+          displayTime: item.displayTime || ""
         }))
       }
     });
