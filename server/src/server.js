@@ -189,7 +189,7 @@ if (config.mysqlHost && config.mysqlUser && config.mysqlDatabase) {
     database: config.mysqlDatabase,
     connectionLimit: config.mysqlPoolSize,
     charset: "utf8mb4",
-    timezone: "Z"
+    timezone: "+08:00"
   });
 }
 
@@ -2214,7 +2214,7 @@ app.get("/api/chat/history", requireLogin, async (req, res) => {
          created_at AS createTime,
          updated_at AS updateTime,
          last_message_at AS lastMessageAt,
-         DATE_FORMAT(CONVERT_TZ(COALESCE(last_message_at, updated_at, created_at), '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS displayTime
+         DATE_FORMAT(COALESCE(last_message_at, updated_at, created_at), '%Y-%m-%d %H:%i:%s') AS displayTime
        FROM portal_agent_sessions
        WHERE user_id = ?
        ORDER BY COALESCE(last_message_at, updated_at, created_at) DESC
@@ -2256,7 +2256,7 @@ app.get("/api/chat/history/detail", requireLogin, async (req, res) => {
 
     const [messages] = await mysqlPool.query(
       `SELECT role, content, created_at AS createTime,
-              DATE_FORMAT(CONVERT_TZ(created_at, '+00:00', '+08:00'), '%Y-%m-%d %H:%i:%s') AS displayTime
+              DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS displayTime
        FROM portal_agent_messages
        WHERE session_id = ?
          AND role IN ('user', 'assistant')
