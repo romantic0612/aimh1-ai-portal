@@ -2362,12 +2362,28 @@ app.post("/api/chat/stream", requireLogin, async (req, res) => {
 
     const plannerStartedAt = Date.now();
     const requestPreviousAgentId = normalizeAgentId(req.body?.previous_agent_id || req.body?.previousAgentId, "");
+    const requestedAgentId = normalizeAgentId(
+      req.body?.agent_id || req.body?.agentId || req.body?.selected_agent_id || req.body?.selectedAgentId,
+      ""
+    );
+    const forcedAgentId = BUSINESS_AGENT_IDS.includes(requestedAgentId) ? requestedAgentId : "";
     const previousAgentId = requestPreviousAgentId || (await getLatestSessionAgent({ sessionId }));
-    route = await selectAgent(message, {
-      sessionId,
-      user,
-      previousAgentId
-    });
+    route = forcedAgentId
+      ? hydrateRoute(
+          {
+            strategy: "single_agent",
+            agentIds: [forcedAgentId],
+            confidence: 1,
+            reason: "User selected a campus agent from the homepage.",
+            planner: "manual"
+          },
+          "manual"
+        )
+      : await selectAgent(message, {
+          sessionId,
+          user,
+          previousAgentId
+        });
     agent =
       route.strategy === "multi_agent_parallel"
         ? { ...buildAgent("general"), planner: route.planner, reason: route.reason }
@@ -2380,7 +2396,7 @@ app.post("/api/chat/stream", requireLogin, async (req, res) => {
       name: "route_capability",
       title: "能力路由",
       content: route.reason || "Route by super-agent planner.",
-      input: { message, previous_agent_id: previousAgentId || "" },
+      input: { message, previous_agent_id: previousAgentId || "", requested_agent_id: forcedAgentId || "" },
       output: routeLogOutput(route),
       latencyMs: Date.now() - plannerStartedAt,
       startedAt: plannerStartedAt,
