@@ -2280,6 +2280,91 @@ app.get("/api/chat/history/detail", requireLogin, async (req, res) => {
   }
 });
 
+app.delete("/api/chat/history/:sessionId", requireLogin, async (req, res) => {
+  if (!mysqlPool) {
+    return res.status(503).json({ success: false, message: "MySQL is not configured" });
+  }
+
+  const user = getSessionUser(req);
+  const userId = String(user.user_id || "guest");
+  const sessionId = normalizeMessage(req.params?.sessionId || "").slice(0, 96);
+  if (!sessionId) {
+    return res.status(400).json({ success: false, message: "Missing sessionId" });
+  }
+
+  const connection = await mysqlPool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [sessions] = await connection.query(
+      `SELECT session_id AS sessionId
+       FROM portal_agent_sessions
+       WHERE session_id = ? AND user_id = ?
+       LIMIT 1`,
+      [sessionId, userId]
+    );
+    if (!sessions?.length) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: "History session not found" });
+    }
+
+    await connection.query(`DELETE FROM portal_agent_run_steps WHERE session_id = ?`, [sessionId]);
+    await connection.query(`DELETE FROM portal_agent_tool_calls WHERE session_id = ?`, [sessionId]);
+    await connection.query(`DELETE FROM portal_agent_messages WHERE session_id = ?`, [sessionId]);
+    await connection.query(`DELETE FROM portal_agent_runs WHERE session_id = ?`, [sessionId]);
+    await connection.query(`DELETE FROM portal_agent_sessions WHERE session_id = ? AND user_id = ?`, [sessionId, userId]);
+    await connection.commit();
+    res.json({ success: true });
+  } catch (error) {
+    await connection.rollback();
+    console.error("[chat/history/delete] failed:", error.message);
+    res.status(500).json({ success: false, message: "Failed to delete chat history" });
+  } finally {
+    connection.release();
+  }
+});
+
+app.delete("/api/chat/history", requireLogin, async (req, res) => {
+  if (!mysqlPool) {
+    return res.status(503).json({ success: false, message: "MySQL is not configured" });
+  }
+
+  const user = getSessionUser(req);
+  const userId = String(user.user_id || "guest");
+  const connection = await mysqlPool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.query(
+      `DELETE FROM portal_agent_run_steps
+       WHERE session_id IN (SELECT session_id FROM portal_agent_sessions WHERE user_id = ?)`,
+      [userId]
+    );
+    await connection.query(
+      `DELETE FROM portal_agent_tool_calls
+       WHERE session_id IN (SELECT session_id FROM portal_agent_sessions WHERE user_id = ?)`,
+      [userId]
+    );
+    await connection.query(
+      `DELETE FROM portal_agent_messages
+       WHERE session_id IN (SELECT session_id FROM portal_agent_sessions WHERE user_id = ?)`,
+      [userId]
+    );
+    await connection.query(
+      `DELETE FROM portal_agent_runs
+       WHERE session_id IN (SELECT session_id FROM portal_agent_sessions WHERE user_id = ?)`,
+      [userId]
+    );
+    await connection.query(`DELETE FROM portal_agent_sessions WHERE user_id = ?`, [userId]);
+    await connection.commit();
+    res.json({ success: true });
+  } catch (error) {
+    await connection.rollback();
+    console.error("[chat/history/clear] failed:", error.message);
+    res.status(500).json({ success: false, message: "Failed to clear chat history" });
+  } finally {
+    connection.release();
+  }
+});
+
 app.post("/api/chat/stream", requireLogin, async (req, res) => {
   const message = normalizeMessage(req.body?.message);
   if (!message) {
