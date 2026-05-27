@@ -1,0 +1,113 @@
+.hero-copy:before {
+  content: none !important;
+  display: none !important;
+}
+
+.hero .portal-composer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  width: min(900px, 100%);
+  min-height: 118px;
+  padding: 12px;
+  border-radius: 24px;
+  background: rgba(247, 250, 245, 0.94);
+}
+
+.composer-input-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.portal-composer input {
+  min-width: 0;
+  height: 52px;
+  font-size: 16px;
+}
+
+.composer-agent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-left: 2px;
+}
+
+.portal-composer .agent-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 34px;
+  min-width: 0;
+  padding: 0 13px;
+  border: 1px solid rgba(8, 115, 79, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.68);
+  color: #36584b;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: none;
+  transform: none;
+}
+
+.auto-route-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(8, 115, 79, 0.08);
+  color: #53665d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.auto-route-pill.active {
+  border-color: rgba(8, 115, 79, 0.4);
+  background: #eef8f2;
+  color: #08734f;
+}
+
+.portal-composer .agent-chip:hover,
+.portal-composer .agent-chip.active {
+  border-color: rgba(8, 115, 79, 0.55);
+  background: #dff3e7;
+  color: #08734f;
+}
+
+.portal-composer .composer-send {
+  min-width: 74px;
+}
+
+@media (max-width: 640px) {
+  .hero .portal-composer {
+    min-height: 148px;
+    border-radius: 20px;
+  }
+
+  .composer-input-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .portal-composer .composer-send {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .composer-agent-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .portal-composer .agent-chip {
+    width: 100%;
+  }
+
+  .auto-route-pill {
+    width: 100%;
+  }
+}
