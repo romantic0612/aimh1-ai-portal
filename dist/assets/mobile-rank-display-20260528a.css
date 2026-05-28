@@ -1,0 +1,177 @@
+html.mobile-preview.mobile-rank,
+html.mobile-preview.mobile-rank body {
+  min-height: 100%;
+  background: #071612 !important;
+  overflow-x: hidden !important;
+}
+
+html.mobile-preview.mobile-rank body {
+  background:
+    linear-gradient(180deg, rgba(6, 24, 20, 0.2), rgba(6, 24, 20, 0.92)),
+    linear-gradient(90deg, rgba(5, 18, 16, 0.9), rgba(5, 18, 16, 0.12) 28%, rgba(5, 18, 16, 0.12) 72%, rgba(5, 18, 16, 0.9)),
+    url("/黑夜.jpg") center top / cover fixed !important;
+}
+
+html.mobile-preview.mobile-rank .page,
+html.mobile-preview.mobile-rank #app {
+  min-height: 100vh !important;
+  background: transparent !important;
+}
+
+html.mobile-preview.mobile-rank .home-main {
+  width: min(430px, 100vw) !important;
+  min-height: 100vh !important;
+  margin: 0 auto !important;
+  padding: 64px 14px 24px !important;
+  background:
+    linear-gradient(180deg, rgba(11, 57, 48, 0.76), rgba(8, 21, 24, 0.92)),
+    radial-gradient(circle at 18% 8%, rgba(22, 173, 121, 0.28), transparent 38%),
+    radial-gradient(circle at 82% 2%, rgba(87, 148, 255, 0.2), transparent 36%) !important;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.38);
+}
+
+html.mobile-preview.mobile-rank .hero,
+html.mobile-preview.mobile-rank .mobile-frame-composer,
+html.mobile-preview.mobile-rank .portal-composer,
+html.mobile-preview.mobile-rank .home-footer,
+html.mobile-preview.mobile-rank footer,
+html.mobile-preview.mobile-rank .mobile-bottom-nav {
+  display: none !important;
+}
+
+html.mobile-preview.mobile-rank .dual-ranking-panel {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html.mobile-preview.mobile-rank .dual-ranking-panel::before {
+  content: "问答排行榜";
+  display: block;
+  margin: 0 0 14px;
+  color: #f7fffb;
+  font-size: 28px;
+  font-weight: 950;
+  line-height: 1.12;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+html.mobile-preview.mobile-rank .dual-ranking-panel::after {
+  content: "校园 AI 使用数据实时展示";
+  display: block;
+  order: -1;
+  margin: -8px 0 16px;
+  color: rgba(232, 251, 242, 0.68);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+html.mobile-preview.mobile-rank .dual-ranking-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board {
+  padding: 16px !important;
+  border: 1px solid rgba(204, 242, 226, 0.18) !important;
+  border-radius: 8px !important;
+  background: rgba(9, 32, 38, 0.78) !important;
+  color: #f8fffb !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: blur(14px);
+}
+
+html.mobile-preview.mobile-rank .ranking-board-head {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board-title {
+  display: grid !important;
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+html.mobile-preview.mobile-rank .board-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22) !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board-title h2 {
+  margin: 0 !important;
+  color: #f8fffb !important;
+  font-size: 22px !important;
+  line-height: 1.2 !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board-title p {
+  margin-top: 5px !important;
+  color: rgba(223, 245, 235, 0.72) !important;
+  font-size: 13px !important;
+}
+
+html.mobile-preview.mobile-rank .board-tabs {
+  height: 42px !important;
+  padding: 4px !important;
+  border: 1px solid rgba(196, 235, 219, 0.18) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+html.mobile-preview.mobile-rank .board-tabs button {
+  border-radius: 999px !important;
+  color: rgba(231, 250, 242, 0.72) !important;
+  font-weight: 850 !important;
+}
+
+html.mobile-preview.mobile-rank .board-tabs button.active {
+  background: #0d8b60 !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(4, 47, 35, 0.28) !important;
+}
+
+html.mobile-preview.mobile-rank .board-list {
+  gap: 10px !important;
+  margin-top: 14px !important;
+}
+
+html.mobile-preview.mobile-rank .board-row {
+  min-height: 58px !important;
+  padding: 10px 12px !important;
+  border: 1px solid rgba(210, 240, 228, 0.12) !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+html.mobile-preview.mobile-rank .board-rank strong {
+  background: rgba(13, 139, 96, 0.36) !important;
+  color: #dcfff2 !important;
+}
+
+html.mobile-preview.mobile-rank .board-row strong,
+html.mobile-preview.mobile-rank .board-score {
+  color: #f7fffb !important;
+}
+
+html.mobile-preview.mobile-rank .board-row span,
+html.mobile-preview.mobile-rank .board-summary {
+  color: rgba(230, 248, 240, 0.66) !important;
+}
+
+html.mobile-preview.mobile-rank .mobile-frame-tabs a.active {
+  background: #0d8b60 !important;
+  color: #fff !important;
+}
+
+html.mobile-preview.mobile-rank .mobile-frame-tabs a:not(.active) {
+  background: transparent !important;
+}
