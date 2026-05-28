@@ -1660,6 +1660,130 @@ async function streamGeneralAnswer({ res, message, user, agent }) {
   }
 }
 
+async function streamGeneralAnswerV2({ res, message, user, agent }) {
+  const fallbackAnswer = [
+    "\u4f60\u597d\uff0c\u6211\u662f\u519c\u82af\u667a AI\u3002",
+    "",
+    "\u6211\u53ef\u4ee5\u5148\u56de\u7b54\u901a\u7528\u95ee\u9898\u3002\u82e5\u4f60\u8981\u54a8\u8be2\u6559\u52a1\u3001\u56fe\u4e66\u9986\u6216\u5b66\u5de5\u4e8b\u52a1\uff0c\u8bf7\u70b9\u51fb\u8f93\u5165\u6846\u4e0a\u65b9\u5bf9\u5e94\u7684\u667a\u80fd\u4f53\u6309\u94ae\uff0c\u8fd9\u6837\u4f1a\u66f4\u51c6\u786e\u3002"
+  ].join("\n");
+
+  if (!agent.chatUrl || !agent.apiKey) {
+    writeSse(res, { type: "answer_chunk", content: fallbackAnswer, tool_name: agent.toolName });
+    return { answer: fallbackAnswer, conversation_id: "", usage: normalizeUsage(), response_json: {} };
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), config.llmReadTimeoutMs);
+  const systemPrompt = [
+    "\u4f60\u662f\u5b89\u5fbd\u519c\u4e1a\u5927\u5b66 AI \u95e8\u6237\u7684\u9ed8\u8ba4\u6a21\u578b\u52a9\u624b\uff0c\u540d\u53eb\u519c\u82af\u667a AI\u3002",
+    "\u5f53\u524d\u7528\u6237\u6ca1\u6709\u9009\u62e9\u6559\u52a1\u667a\u80fd\u4f53\u3001AI\u9986\u5458\u6216AI\u8f85\u5bfc\u5458\u65f6\uff0c\u95ee\u9898\u7531\u4f60\u76f4\u63a5\u56de\u7b54\u3002",
+    "\u4f60\u9002\u5408\u5904\u7406\u95ee\u5019\u3001\u95f2\u804a\u3001\u5199\u4f5c\u6da6\u8272\u3001\u603b\u7ed3\u3001\u7ffb\u8bd1\u3001\u4ee3\u7801\u89e3\u91ca\u3001\u666e\u901a\u77e5\u8bc6\u548c\u5f00\u653e\u6027\u54a8\u8be2\u3002",
+    "\u56de\u7b54\u4f7f\u7528\u7d27\u51d1 Markdown\uff1a\u77ed\u6bb5\u843d\uff0c\u5fc5\u8981\u65f6\u7528 `- ` \u5217\u8868\uff0c\u4e0d\u8981\u628a\u591a\u4e2a\u4e8b\u9879\u6324\u5728\u4e00\u884c\u3002",
+    "\u9047\u5230\u6559\u52a1\u3001\u56fe\u4e66\u9986\u3001\u5b66\u5de5\u7b49\u6821\u5185\u4e1a\u52a1\u95ee\u9898\u65f6\uff0c\u53ef\u4ee5\u7ed9\u51fa\u901a\u7528\u5c42\u9762\u7684\u89e3\u91ca\u548c\u63d0\u95ee\u5efa\u8bae\uff0c\u4f46\u8981\u63d0\u9192\u7528\u6237\u70b9\u51fb\u5bf9\u5e94\u667a\u80fd\u4f53\u6309\u94ae\u83b7\u53d6\u66f4\u51c6\u786e\u7684\u4e1a\u52a1\u7b54\u590d\u3002",
+    "\u4e0d\u8981\u7f16\u9020\u5177\u4f53\u6821\u5185\u653f\u7b56\u3001\u8bfe\u8868\u3001\u6210\u7ee9\u3001\u8d26\u53f7\u3001\u501f\u9605\u8bb0\u5f55\u3001\u6570\u636e\u5e93\u6743\u9650\u6216\u529e\u7406\u7ed3\u679c\u3002"
+  ].join("\n");
+
+  try {
+    const response = await fetch(agent.chatUrl, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${agent.apiKey}`,
+        "Content-Type": "application/json",
+        Accept: "text/event-stream"
+      },
+      body: JSON.stringify({
+        model: config.llmPlannerModel,
+        temperature: 0.6,
+        stream: true,
+        stream_options: { include_usage: true },
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: normalizeMessage(message) }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(`MiniMax request failed: ${response.status} ${detail}`);
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    if (response.body && /text\/event-stream|stream/i.test(contentType)) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let answer = "";
+      let latestUsage = normalizeUsage();
+      let latestEvent = null;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() || "";
+
+        for (const chunk of chunks) {
+          const dataLine = chunk
+            .split("\n")
+            .map((line) => line.trim())
+            .find((line) => line.startsWith("data:"));
+          if (!dataLine) continue;
+
+          const raw = dataLine.slice(5).trim();
+          if (!raw || raw === "[DONE]") continue;
+
+          const event = parseMaybeJson(raw);
+          latestEvent = event && typeof event === "object" ? event : latestEvent;
+          latestUsage = mergeUsage(latestUsage, usageFromEvent(event));
+          const content =
+            event?.choices?.[0]?.delta?.content ||
+            event?.choices?.[0]?.message?.content ||
+            event?.reply ||
+            event?.output ||
+            event?.text ||
+            "";
+          if (typeof content === "string" && content) {
+            answer += content;
+            writeSse(res, { type: "answer_chunk", content, tool_name: agent.toolName });
+          }
+        }
+      }
+
+      const finalAnswer =
+        answer.trim() ||
+        "\u9ed8\u8ba4\u6a21\u578b\u5df2\u6536\u5230\u8bf7\u6c42\uff0c\u4f46\u6ca1\u6709\u8fd4\u56de\u6709\u6548\u6587\u672c\u3002\u8bf7\u7a0d\u540e\u91cd\u8bd5\uff0c\u6216\u9009\u62e9\u4e0a\u65b9\u6821\u5185\u667a\u80fd\u4f53\u3002";
+      if (!answer.trim()) {
+        writeSse(res, { type: "answer_chunk", content: finalAnswer, tool_name: agent.toolName });
+      }
+      return {
+        answer: finalAnswer,
+        conversation_id: "",
+        usage: latestUsage,
+        response_json: latestEvent && typeof latestEvent === "object" ? latestEvent : {}
+      };
+    }
+
+    const data = await response.json();
+    const answer = String(data?.choices?.[0]?.message?.content || data?.reply || data?.output || "").trim();
+    const finalAnswer =
+      answer ||
+      "\u9ed8\u8ba4\u6a21\u578b\u5df2\u6536\u5230\u8bf7\u6c42\uff0c\u4f46\u6ca1\u6709\u8fd4\u56de\u6709\u6548\u6587\u672c\u3002\u8bf7\u7a0d\u540e\u91cd\u8bd5\uff0c\u6216\u9009\u62e9\u4e0a\u65b9\u6821\u5185\u667a\u80fd\u4f53\u3002";
+    writeSse(res, { type: "answer_chunk", content: finalAnswer, tool_name: agent.toolName });
+    return {
+      answer: finalAnswer,
+      conversation_id: "",
+      usage: normalizeUsage(data?.usage),
+      response_json: data && typeof data === "object" ? data : {}
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function buildSupervisorFallbackAnswer(message, agentResults) {
   const successful = (agentResults || []).filter((item) => item.status === "success" && String(item.answer || "").trim());
   if (!successful.length) {
@@ -2683,7 +2807,7 @@ app.post("/api/chat/stream", requireLogin, async (req, res) => {
       });
 
       const modelStartedAt = Date.now();
-      const result = await streamGeneralAnswer({ res, message, user, agent });
+      const result = await streamGeneralAnswerV2({ res, message, user, agent });
       const latencyMs = Date.now() - startedAt;
       const modelLatencyMs = Date.now() - modelStartedAt;
       const hasAnswer = Boolean(String(result.answer || "").trim());
