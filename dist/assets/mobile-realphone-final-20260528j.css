@@ -186,8 +186,25 @@ html.mobile-preview.mobile-rank .home-main {
   min-height: auto !important;
   height: auto !important;
   overflow: visible !important;
-  padding-bottom: calc(260px + env(safe-area-inset-bottom, 0px)) !important;
-  scroll-padding-bottom: calc(260px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: calc(340px + env(safe-area-inset-bottom, 0px)) !important;
+  scroll-padding-top: 86px !important;
+  scroll-padding-bottom: calc(340px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.mobile-rank .ranking-board,
+html.mobile-preview.mobile-rank .ranking-board {
+  scroll-margin-top: 86px !important;
+  scroll-margin-bottom: calc(340px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.mobile-rank .ranking-board + .ranking-board,
+html.mobile-preview.mobile-rank .ranking-board + .ranking-board {
+  margin-top: 18px !important;
+}
+
+html.mobile-rank .ranking-board:last-child,
+html.mobile-preview.mobile-rank .ranking-board:last-child {
+  margin-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 @media (max-width: 430px), (max-height: 780px) {
@@ -195,6 +212,14 @@ html.mobile-preview.mobile-rank .home-main {
   html.mobile-preview.mobile-rank .home-main {
     padding-top: 56px !important;
     padding-inline: 10px !important;
+    padding-bottom: calc(420px + env(safe-area-inset-bottom, 0px)) !important;
+    scroll-padding-bottom: calc(420px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html.mobile-rank .ranking-board,
+  html.mobile-preview.mobile-rank .ranking-board {
+    scroll-margin-top: 78px !important;
+    scroll-margin-bottom: calc(420px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   html.mobile-rank .ranking-board,
@@ -251,5 +276,18 @@ html.mobile-preview.mobile-rank .home-main {
   html.mobile-preview.mobile-rank .board-summary {
     margin-top: 10px !important;
     font-size: 13px !important;
+  }
+}
+
+@media (max-height: 700px) {
+  html.mobile-rank .home-main,
+  html.mobile-preview.mobile-rank .home-main {
+    padding-bottom: calc(500px + env(safe-area-inset-bottom, 0px)) !important;
+    scroll-padding-bottom: calc(500px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html.mobile-rank .ranking-board,
+  html.mobile-preview.mobile-rank .ranking-board {
+    scroll-margin-bottom: calc(500px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
