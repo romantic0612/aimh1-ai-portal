@@ -177,18 +177,20 @@ The frontend currently has packaged output only. There is no reliable source bui
 Before changing frontend assets:
 
 1. Read the current `dist/index.html`.
-2. Create a new dated and sequenced JS/CSS file.
-3. Update `dist/index.html` to reference the new file.
-4. Do not overwrite old versioned assets directly.
-5. Do not bulk-delete old assets.
-6. Do not casually change the top brand image paths.
+2. Prefer editing the currently active JS/CSS file already referenced by `dist/index.html`.
+3. Do not create a new JS/CSS file for every small change.
+4. Create a new dated file only for a large risky change, a rollback boundary, or when the user explicitly asks for version isolation.
+5. If a new file is created, update `dist/index.html` and explain why a new file was necessary.
+6. Do not bulk-delete old assets.
+7. Do not casually change the top brand image paths.
 
-Example versioned files:
+Current maintenance preference:
 
 ```text
-index-chat-agent-switch-20260527a.js
-index-chat-agent-switch-20260527a.css
-mobile-realphone-final-20260528j.css
+Small fixes -> edit the active referenced file.
+Mobile CSS fixes -> edit the latest active mobile CSS file when possible.
+Mobile JS fixes -> edit the latest active mobile JS file when possible.
+Large redesigns -> create one new consolidated CSS/JS pair, not many tiny files.
 ```
 
 ## Asset Cleanup Policy
@@ -220,7 +222,8 @@ Recommended cleanup direction:
 
 - Create an asset inventory first.
 - Keep the current production set stable.
-- Consolidate future mobile overrides into fewer new files.
+- Consolidate future mobile overrides into fewer active files.
+- After consolidation, edit those active files directly for ordinary fixes.
 - Later, restore a real frontend source build pipeline so `dist/` can be regenerated cleanly.
 
 ## Current Mobile UI State
@@ -269,8 +272,9 @@ Recommended safe next steps:
 3. Mark older files that appear unreferenced.
 4. Let the user choose whether to delete anything.
 5. If deleting, delete one explicit file at a time.
-6. Consider rebuilding the frontend source pipeline before any major UI work.
-7. After the asset situation is clear, continue with the Agent Center page.
+6. Consolidate the active mobile patches into fewer maintained files when practical.
+7. Consider rebuilding the frontend source pipeline before any major UI work.
+8. After the asset situation is clear, continue with the Agent Center page.
 
 ## Agent Center Plan
 
