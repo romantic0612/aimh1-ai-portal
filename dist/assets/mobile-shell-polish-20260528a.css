@@ -1,0 +1,527 @@
+html.mobile-home-frame .mobile-frame-topbar.mobile-portal-topbar,
+html.mobile-rank .mobile-frame-topbar.mobile-portal-topbar {
+  grid-template-columns: minmax(112px, 0.86fr) minmax(150px, 1.2fr) minmax(70px, 0.56fr) !important;
+  height: 54px !important;
+  padding: 6px 8px !important;
+  gap: 6px !important;
+  background: rgba(249, 253, 250, 0.96) !important;
+  border-bottom: 1px solid rgba(14, 100, 72, 0.12);
+  box-shadow: 0 8px 26px rgba(10, 51, 38, 0.12) !important;
+}
+
+.mobile-frame-brand,
+.mobile-frame-profile {
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.mobile-frame-brand {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  color: #0a5039;
+}
+
+.mobile-frame-brand img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.mobile-frame-brand span,
+.mobile-frame-profile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mobile-frame-brand b {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-frame-brand small {
+  color: rgba(10, 80, 57, 0.58);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+html.mobile-home-frame .mobile-frame-tabs,
+html.mobile-rank .mobile-frame-tabs {
+  height: 42px !important;
+  padding: 3px !important;
+  border: 1px solid rgba(13, 139, 96, 0.13);
+  border-radius: 999px;
+  background: rgba(236, 248, 241, 0.82) !important;
+}
+
+html.mobile-home-frame .mobile-frame-tabs a,
+html.mobile-rank .mobile-frame-tabs a {
+  min-width: 0 !important;
+  width: 100%;
+  height: 34px !important;
+  padding: 0 5px !important;
+  color: #143d31 !important;
+  font-size: 13px !important;
+}
+
+html.mobile-home-frame .mobile-frame-tabs a.active,
+html.mobile-rank .mobile-frame-tabs a.active {
+  background: #0d8b60 !important;
+  color: #fff !important;
+  box-shadow: 0 5px 12px rgba(13, 139, 96, 0.22) !important;
+}
+
+.mobile-frame-profile {
+  align-items: center;
+  padding: 0 8px;
+  background: #f4faf6;
+  color: #123a2e;
+  box-shadow: inset 0 0 0 1px rgba(13, 139, 96, 0.14);
+}
+
+.mobile-frame-profile strong {
+  overflow: hidden;
+  max-width: 58px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-frame-profile small {
+  margin-top: 3px;
+  color: rgba(18, 58, 46, 0.55);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+html.mobile-rank body {
+  background:
+    linear-gradient(180deg, rgba(239, 248, 243, 0.92), rgba(229, 241, 235, 0.96)),
+    url("/黑夜.jpg") center top / cover fixed !important;
+}
+
+html.mobile-rank .home-main {
+  padding-top: 74px !important;
+  background:
+    linear-gradient(180deg, rgba(241, 250, 245, 0.94), rgba(232, 243, 238, 0.96)),
+    radial-gradient(circle at 18% 8%, rgba(13, 139, 96, 0.16), transparent 38%) !important;
+}
+
+html.mobile-rank .dual-ranking-panel::before {
+  color: #0b2f25 !important;
+  text-shadow: none !important;
+}
+
+html.mobile-rank .dual-ranking-panel::after {
+  color: rgba(14, 58, 45, 0.62) !important;
+}
+
+html.mobile-rank .ranking-board {
+  border-color: rgba(13, 107, 78, 0.14) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #123a2e !important;
+  box-shadow: 0 14px 34px rgba(26, 77, 58, 0.13) !important;
+}
+
+html.mobile-rank .ranking-board-title h2,
+html.mobile-rank .board-row strong,
+html.mobile-rank .board-score {
+  color: #123a2e !important;
+}
+
+html.mobile-rank .ranking-board-title p,
+html.mobile-rank .board-row span,
+html.mobile-rank .board-summary {
+  color: rgba(18, 58, 46, 0.62) !important;
+}
+
+html.mobile-rank .board-tabs {
+  border-color: rgba(13, 107, 78, 0.14) !important;
+  background: rgba(238, 248, 243, 0.92) !important;
+}
+
+html.mobile-rank .board-tabs button {
+  color: #315f4f !important;
+}
+
+html.mobile-rank .board-row {
+  border-color: rgba(13, 107, 78, 0.11) !important;
+  background: rgba(245, 250, 247, 0.92) !important;
+}
+
+html.mobile-rank .board-rank strong {
+  background: rgba(13, 139, 96, 0.14) !important;
+  color: #0a7550 !important;
+}
+
+html.mobile-preview.mobile-rank body {
+  background:
+    linear-gradient(180deg, rgba(239, 248, 243, 0.94), rgba(229, 241, 235, 0.98)),
+    url("/黑夜.jpg") center top / cover fixed !important;
+}
+
+html.mobile-preview.mobile-rank .home-main {
+  padding-top: 74px !important;
+  background:
+    linear-gradient(180deg, rgba(244, 250, 246, 0.96), rgba(235, 245, 240, 0.98)),
+    radial-gradient(circle at 18% 8%, rgba(13, 139, 96, 0.14), transparent 38%) !important;
+}
+
+html.mobile-preview.mobile-rank .dual-ranking-panel::before {
+  color: #0b2f25 !important;
+  text-shadow: none !important;
+}
+
+html.mobile-preview.mobile-rank .dual-ranking-panel::after {
+  color: rgba(14, 58, 45, 0.62) !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board {
+  border-color: rgba(13, 107, 78, 0.14) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #123a2e !important;
+  box-shadow: 0 14px 34px rgba(26, 77, 58, 0.13) !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board-title h2,
+html.mobile-preview.mobile-rank .board-row strong,
+html.mobile-preview.mobile-rank .board-score {
+  color: #123a2e !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board-title p,
+html.mobile-preview.mobile-rank .board-row span,
+html.mobile-preview.mobile-rank .board-summary {
+  color: rgba(18, 58, 46, 0.64) !important;
+}
+
+html.mobile-preview.mobile-rank .board-tabs {
+  border-color: rgba(13, 107, 78, 0.14) !important;
+  background: rgba(238, 248, 243, 0.92) !important;
+}
+
+html.mobile-preview.mobile-rank .board-tabs button {
+  color: #315f4f !important;
+}
+
+html.mobile-preview.mobile-rank .board-tabs button.active {
+  background: #0d8b60 !important;
+  color: #fff !important;
+}
+
+html.mobile-preview.mobile-rank .board-row {
+  border-color: rgba(13, 107, 78, 0.11) !important;
+  background: rgba(245, 250, 247, 0.95) !important;
+}
+
+html.mobile-preview.mobile-rank .board-rank strong {
+  background: rgba(13, 139, 96, 0.14) !important;
+  color: #0a7550 !important;
+}
+
+html.mobile-chat-frame,
+html.mobile-chat-frame body,
+html.mobile-chat-frame #app,
+html.mobile-chat-frame .page,
+html.mobile-chat-frame .chat-main {
+  width: min(430px, 100vw) !important;
+  min-height: 100vh !important;
+  margin: 0 auto !important;
+  overflow-x: hidden !important;
+}
+
+html.mobile-chat-frame body {
+  background: #f3f7f4 !important;
+}
+
+html.mobile-chat-frame .topbar,
+html.mobile-chat-frame .mobile-bottom-nav,
+html.mobile-chat-frame .chat-tools,
+html.mobile-chat-frame .agent-status {
+  display: none !important;
+}
+
+.mobile-chat-topbar {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 130;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  width: min(430px, 100vw);
+  height: 54px;
+  padding: 6px 8px;
+  transform: translateX(-50%);
+  background: rgba(249, 253, 250, 0.96);
+  border-bottom: 1px solid rgba(14, 100, 72, 0.12);
+  box-shadow: 0 8px 24px rgba(10, 51, 38, 0.1);
+}
+
+.mobile-chat-history,
+.mobile-chat-new {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: #0d5f45;
+  color: #fff;
+}
+
+.mobile-chat-history {
+  gap: 5px;
+}
+
+.mobile-chat-history span {
+  display: block;
+  width: 17px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.mobile-chat-new {
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.mobile-chat-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  gap: 8px;
+  min-width: 0;
+  color: #103a2f;
+  font-size: 17px;
+  font-weight: 950;
+  text-decoration: none;
+}
+
+.mobile-chat-brand img {
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+}
+
+html.mobile-chat-frame .chat-main {
+  padding: 64px 0 92px !important;
+  background:
+    linear-gradient(180deg, #f4faf6, #eef5f1) !important;
+}
+
+html.mobile-chat-frame .chat-workspace {
+  display: block !important;
+  width: 100% !important;
+  min-height: calc(100vh - 156px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html.mobile-chat-frame .chat-center {
+  width: 100% !important;
+  min-height: calc(100vh - 156px) !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html.mobile-chat-frame .chat-window {
+  height: calc(100vh - 176px) !important;
+  padding: 8px 0 14px !important;
+  overflow-y: auto !important;
+}
+
+html.mobile-chat-frame .message {
+  max-width: 86% !important;
+  margin-bottom: 10px !important;
+}
+
+html.mobile-chat-frame .message.user {
+  margin-left: auto !important;
+}
+
+html.mobile-chat-frame .message.assistant {
+  margin-right: auto !important;
+}
+
+html.mobile-chat-frame .bubble {
+  border-radius: 16px !important;
+  font-size: 15px !important;
+  line-height: 1.62 !important;
+}
+
+html.mobile-chat-frame .message.user .bubble {
+  background: #0d8b60 !important;
+  color: #fff !important;
+}
+
+html.mobile-chat-frame .message.assistant .bubble {
+  background: #fff !important;
+  color: #17382f !important;
+  box-shadow: 0 8px 22px rgba(20, 75, 56, 0.08);
+}
+
+html.mobile-chat-frame .chat-input {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 120 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: min(406px, calc(100vw - 24px)) !important;
+  min-height: 58px !important;
+  padding: 6px !important;
+  transform: translateX(-50%);
+  border: 1px solid rgba(13, 139, 96, 0.18) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 12px 34px rgba(13, 75, 53, 0.16) !important;
+}
+
+html.mobile-chat-frame .chat-input input {
+  height: 46px !important;
+  padding: 0 18px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: #193b31 !important;
+  font-size: 16px !important;
+}
+
+html.mobile-chat-frame .chat-input input::placeholder {
+  color: rgba(25, 59, 49, 0.45) !important;
+}
+
+html.mobile-chat-frame .chat-input button[type="submit"] {
+  display: none !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch {
+  position: fixed !important;
+  left: 50% !important;
+  bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 120 !important;
+  display: flex !important;
+  width: min(406px, calc(100vw - 24px)) !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  transform: translateX(-50%);
+}
+
+html.mobile-chat-frame .chat-agent-switch button {
+  flex: 0 0 auto;
+  height: 32px !important;
+  padding: 0 12px !important;
+  border: 1px solid rgba(13, 139, 96, 0.24) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #15533d !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch button.active {
+  border-color: #0d8b60 !important;
+  background: #0d8b60 !important;
+  color: #fff !important;
+}
+
+.mobile-chat-drawer-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: none;
+  border: 0;
+  background: rgba(6, 24, 18, 0.38);
+}
+
+body.mobile-chat-history-open .mobile-chat-drawer-mask {
+  display: block;
+}
+
+html.mobile-chat-frame .chat-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: max(0px, calc((100vw - 430px) / 2)) !important;
+  z-index: 150 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: min(322px, 84vw) !important;
+  max-height: none !important;
+  padding: 16px 12px !important;
+  transform: translateX(-105%);
+  border: 0 !important;
+  border-radius: 0 18px 18px 0 !important;
+  background: #10251d !important;
+  box-shadow: 18px 0 40px rgba(0, 0, 0, 0.26) !important;
+  transition: transform 0.22s ease;
+}
+
+body.mobile-chat-history-open .chat-sidebar {
+  transform: translateX(0) !important;
+}
+
+html.mobile-chat-frame .chat-sidebar .side-title,
+html.mobile-chat-frame .history-item strong {
+  color: #f7fffb !important;
+}
+
+html.mobile-chat-frame .history-item small {
+  color: rgba(239, 255, 248, 0.56) !important;
+}
+
+html.mobile-chat-frame .history-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 28px !important;
+  align-items: center !important;
+  min-height: 62px !important;
+  padding: 8px 8px !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+html.mobile-chat-frame .history-item {
+  min-height: 42px !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+html.mobile-chat-frame .history-item strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.mobile-chat-frame .history-more {
+  width: 26px !important;
+  height: 26px !important;
+  color: rgba(239, 255, 248, 0.45) !important;
+}
+
+html.mobile-chat-frame .clear-chat-btn,
+html.mobile-chat-frame .new-chat-btn {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #eafff7 !important;
+}
