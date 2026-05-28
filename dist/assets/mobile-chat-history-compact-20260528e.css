@@ -1,0 +1,73 @@
+html.mobile-chat-frame .chat-sidebar {
+  width: min(330px, 78vw) !important;
+  padding: 30px 16px 22px !important;
+  background: #0b1110 !important;
+}
+
+.mobile-history-search {
+  height: 50px !important;
+  margin-bottom: 24px !important;
+  padding: 0 16px !important;
+}
+
+.mobile-history-search input {
+  font-size: 16px !important;
+}
+
+.mobile-history-group {
+  margin: 18px 0 10px !important;
+  color: #8c9592 !important;
+  font-size: 15px !important;
+  font-weight: 850 !important;
+}
+
+html.mobile-chat-frame .history-row.mobile-history-line,
+html.mobile-chat-frame .history-row.mobile-history-line.is-mobile-first {
+  display: grid !important;
+  grid-template-columns: minmax(0, auto) 22px !important;
+  align-self: flex-start !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 0 16px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html.mobile-chat-frame .history-row.mobile-history-line.is-mobile-first .history-item strong {
+  color: #7fa4ff !important;
+}
+
+html.mobile-chat-frame .history-row.mobile-history-line .history-item,
+html.mobile-chat-frame .history-row.mobile-history-line.is-mobile-first .history-item {
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  justify-content: center !important;
+}
+
+html.mobile-chat-frame .history-row.mobile-history-line .history-item strong {
+  max-width: 230px !important;
+  color: #f0f4f2 !important;
+  font-size: 16px !important;
+  font-weight: 780 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+}
+
+html.mobile-chat-frame .history-row.mobile-history-line.is-mobile-first .history-item strong {
+  max-width: 210px !important;
+}
+
+html.mobile-chat-frame .history-row.mobile-history-line .history-more {
+  width: 22px !important;
+  height: 22px !important;
+  color: #7c8582 !important;
+  font-size: 14px !important;
+}
