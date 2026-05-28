@@ -1,0 +1,157 @@
+html.mobile-preview.mobile-rank .home-main {
+  padding: 62px 10px 18px !important;
+}
+
+html.mobile-preview.mobile-rank .dual-ranking-panel::before {
+  margin-bottom: 10px !important;
+  font-size: 22px !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board {
+  padding: 12px !important;
+  border-radius: 8px !important;
+}
+
+html.mobile-preview.mobile-rank .dual-ranking-grid {
+  gap: 12px !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board-title {
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  gap: 10px !important;
+}
+
+html.mobile-preview.mobile-rank .board-icon {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board-title h2 {
+  font-size: 20px !important;
+}
+
+html.mobile-preview.mobile-rank .ranking-board-title p {
+  font-size: 12px !important;
+}
+
+html.mobile-preview.mobile-rank .board-tabs {
+  height: 38px !important;
+}
+
+html.mobile-preview.mobile-rank .board-tabs button {
+  font-size: 13px !important;
+}
+
+html.mobile-preview.mobile-rank .board-list {
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+html.mobile-preview.mobile-rank .board-row {
+  min-height: 52px !important;
+  padding: 8px 10px !important;
+}
+
+html.mobile-preview.mobile-rank .board-rank strong {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 14px !important;
+}
+
+html.mobile-preview.mobile-rank .board-row strong,
+html.mobile-preview.mobile-rank .board-score {
+  font-size: 15px !important;
+}
+
+html.mobile-preview.mobile-rank .board-summary {
+  margin-top: 12px !important;
+  font-size: 13px !important;
+}
+
+html.mobile-chat-frame {
+  background: #eef7f2 !important;
+}
+
+html.mobile-chat-frame body,
+html.mobile-chat-frame .chat-main,
+html.mobile-chat-frame .chat-center {
+  background: #eef7f2 !important;
+}
+
+html.mobile-chat-frame.mobile-keyboard-open .chat-main {
+  background: #eef7f2 !important;
+}
+
+html.mobile-chat-frame.mobile-keyboard-open .chat-window {
+  background: #eef7f2 !important;
+}
+
+html.mobile-chat-frame.mobile-keyboard-open .chat-agent-switch {
+  bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.mobile-chat-frame.mobile-keyboard-open .chat-input {
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.mobile-chat-frame .message.assistant.thinking {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  min-width: 108px !important;
+  min-height: 38px !important;
+  margin-right: auto !important;
+  padding: 9px 12px !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 8px 22px rgba(20, 75, 56, 0.08) !important;
+}
+
+html.mobile-chat-frame .message.assistant.thinking::before {
+  content: attr(data-mobile-waiting);
+  color: #6a7d75;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+html.mobile-chat-frame .message.assistant.thinking:not([data-mobile-waiting])::before {
+  content: "正在思考中...";
+}
+
+html.mobile-chat-frame .message.assistant.thinking .typing-dots {
+  margin-left: 8px !important;
+}
+
+html.mobile-chat-frame .mobile-chat-rescue-note {
+  max-width: 82% !important;
+  margin-right: auto !important;
+  padding: 10px 12px !important;
+  border: 1px solid rgba(191, 89, 61, 0.18) !important;
+  border-radius: 14px !important;
+  background: #fff7f4 !important;
+  color: #8a321d !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+
+@media (max-width: 380px) {
+  html.mobile-home-frame .mobile-frame-topbar.mobile-portal-topbar,
+  html.mobile-rank .mobile-frame-topbar.mobile-portal-topbar {
+    grid-template-columns: minmax(94px, 0.78fr) minmax(132px, 1.15fr) minmax(58px, 0.48fr) !important;
+    padding-inline: 6px !important;
+  }
+
+  .mobile-frame-brand b {
+    font-size: 15px !important;
+  }
+
+  html.mobile-home-frame .mobile-frame-tabs a,
+  html.mobile-rank .mobile-frame-tabs a {
+    font-size: 12px !important;
+  }
+
+  .mobile-frame-profile strong {
+    max-width: 46px !important;
+    font-size: 11px !important;
+  }
+}
