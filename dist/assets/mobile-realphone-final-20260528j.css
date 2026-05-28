@@ -1,3 +1,81 @@
+html.mobile-chat-frame .chat-input {
+  grid-template-columns: 42px minmax(0, 1fr) 58px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 66px !important;
+  padding: 9px 9px 9px 10px !important;
+  border: 1px solid rgba(14, 126, 87, 0.34) !important;
+  border-bottom-color: rgba(9, 113, 76, 0.1) !important;
+  border-radius: 30px 30px 14px 14px !important;
+  background: rgba(245, 250, 246, 0.96) !important;
+  box-shadow: 0 -8px 24px rgba(8, 30, 20, 0.08) !important;
+}
+
+html.mobile-chat-frame .chat-input::before {
+  content: "" !important;
+  display: block !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  background: #fff url("/logo.png") center / 34px 34px no-repeat !important;
+  box-shadow: 0 4px 14px rgba(12, 89, 61, 0.14) !important;
+}
+
+html.mobile-chat-frame .chat-input input {
+  height: 46px !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #23392f !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+html.mobile-chat-frame .chat-input input::placeholder {
+  color: rgba(58, 72, 64, 0.58) !important;
+}
+
+html.mobile-chat-frame .chat-input button[type="submit"] {
+  width: 54px !important;
+  min-width: 54px !important;
+  height: 48px !important;
+  border-radius: 999px !important;
+  background: #0d8f62 !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch {
+  gap: 8px !important;
+  padding: 7px 8px 8px !important;
+  border: 1px solid rgba(14, 126, 87, 0.22) !important;
+  border-top: 0 !important;
+  border-radius: 14px 14px 28px 28px !important;
+  background: rgba(245, 250, 246, 0.96) !important;
+  box-shadow: 0 12px 26px rgba(8, 30, 20, 0.08) !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch button {
+  min-height: 34px !important;
+  border: 1px solid rgba(14, 126, 87, 0.38) !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: #184a38 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch button.active,
+html.mobile-chat-frame .chat-agent-switch button[aria-pressed="true"] {
+  border-color: #0c8f61 !important;
+  background: #0c8f61 !important;
+  color: #fff !important;
+}
+
 @media (hover: none), (pointer: coarse), (max-width: 640px) {
   html.mobile-chat-frame .chat-agent-switch,
   html.mobile-chat-frame .chat-input,
@@ -47,10 +125,10 @@
 
   html.mobile-chat-frame .chat-input {
     bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
-    grid-template-columns: minmax(0, 1fr) 58px !important;
+    grid-template-columns: 42px minmax(0, 1fr) 58px !important;
     min-height: 66px !important;
     gap: 9px !important;
-    padding: 9px 9px 9px 16px !important;
+    padding: 9px 9px 9px 10px !important;
     border: 1px solid rgba(9, 113, 76, 0.14) !important;
     border-bottom-color: rgba(9, 113, 76, 0.08) !important;
     border-radius: 30px 30px 14px 14px !important;
@@ -60,9 +138,9 @@
 
   html.mobile-chat-frame .chat-input input {
     height: 48px !important;
-    border-radius: 24px !important;
-    background: rgba(255, 255, 255, 0.88) !important;
-    border: 1px solid rgba(9, 113, 76, 0.1) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
     color: #0f3328 !important;
   }
 
