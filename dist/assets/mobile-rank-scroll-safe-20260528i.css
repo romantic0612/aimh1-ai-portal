@@ -1,0 +1,49 @@
+html.mobile-rank,
+html.mobile-rank body,
+html.mobile-preview.mobile-rank,
+html.mobile-preview.mobile-rank body {
+  min-height: 100% !important;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+html.mobile-rank .page,
+html.mobile-rank #app,
+html.mobile-preview.mobile-rank .page,
+html.mobile-preview.mobile-rank #app {
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+html.mobile-rank .home-main,
+html.mobile-preview.mobile-rank .home-main {
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.mobile-rank .dual-ranking-panel,
+html.mobile-rank .dual-ranking-grid,
+html.mobile-rank .ranking-board,
+html.mobile-preview.mobile-rank .dual-ranking-panel,
+html.mobile-preview.mobile-rank .dual-ranking-grid,
+html.mobile-preview.mobile-rank .ranking-board {
+  overflow: visible !important;
+}
+
+html.mobile-rank .ranking-board:last-child,
+html.mobile-preview.mobile-rank .ranking-board:last-child {
+  margin-bottom: 0 !important;
+}
+
+@supports (height: 100dvh) {
+  html.mobile-rank .home-main,
+  html.mobile-preview.mobile-rank .home-main {
+    min-height: 100dvh !important;
+  }
+}
