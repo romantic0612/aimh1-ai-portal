@@ -1,10 +1,12 @@
 # AIMH1 Project Notes
 
+This file is the operating guide for future Codex work in this repository. Keep it readable, conservative, and up to date.
+
 ## Safety Rules
 
-禁止批量删除文件或目录。
+Do not bulk-delete files or directories.
 
-不要使用：
+Never use:
 
 - `del /s`
 - `rd /s`
@@ -12,43 +14,85 @@
 - `Remove-Item -Recurse`
 - `rm -rf`
 
-需要删除文件时，只能一次删除一个明确路径的文件，例如：
+If a file must be deleted, delete only one explicit path at a time, for example:
 
 ```powershell
 Remove-Item "C:\path\to\file.txt"
 ```
 
-如果需要批量删除文件，应停止操作，并让用户手动删除。
+If many files look removable, stop and produce a review list for the user. Do not delete the list automatically.
 
-## Current App Shape
+Never commit real secrets:
 
-这是一个已打包前端加 Node/Express 后端的项目。
+- `.env`
+- database passwords
+- CAS secrets
+- API keys
+- Dify keys
+- MiniMax or OpenAI-compatible model keys
 
-- 前端静态产物在 `dist/`。
-- 后端在 `server/`。
-- 后端入口是 `server/src/server.js`。
-- 后端启动脚本在 `server/package.json`：`npm run dev` 或 `npm start`。
-- 生产部署可使用根目录 `ecosystem.config.cjs`，通过 PM2 cluster 启动。
-- GitHub 仓库：`https://github.com/romantic0612/aimh1-ai-portal.git`。
-- 生产访问域名：`https://sjaigc.ahau.edu.cn/`。
+Do not repeat real secrets in replies.
 
-## Core Capability Summary
+## Project Shape
 
-当前代码主要实现安徽农业大学 AI 门户：
+This is a packaged frontend plus Node/Express backend project.
 
-- CAS/OAuth 登录、退出、登录态查询。
-- 静态前端托管，后端在存在 `dist/` 时提供 SPA fallback。
-- 聊天入口 `/api/chat/stream`，使用 SSE 流式返回。
-- 聊天历史查询、详情查询、单条删除、全部清空。
-- 首页和聊天页支持三个校内智能体：教务智能体、AI馆员、AI辅导员。
-- 不选智能体时走默认 MiniMax/兼容 OpenAI Chat Completions 的通用模型。
-- 选中智能体时强制走对应 Dify 智能体，不再做自动路由。
-- 排行榜 `/api/rankings`，基于用户使用次数、有效调用、token 等统计。
-- 智能体列表 `/api/agents`，可从数据库的 `portal_agent_links` 读取。
-- 反馈和加入申请提交。
-- 后台观测台用于查看访问、问题、热门问题、错误调用和趋势。
+- Static frontend output is in `dist/`.
+- Frontend entry file is `dist/index.html`.
+- Backend code is in `server/`.
+- Backend entry file is `server/src/server.js`.
+- Backend scripts are in `server/package.json`: `npm run dev` and `npm start`.
+- Production can run with `ecosystem.config.cjs` and PM2 cluster mode.
+- GitHub repository: `https://github.com/romantic0612/aimh1-ai-portal.git`.
+- Production domain: `https://sjaigc.ahau.edu.cn/`.
 
-主要接口：
+## Production Setup
+
+Production uses Docker plus PM2 cluster.
+
+- PM2 app name: `aimh1-portal`
+- PM2 mode: `exec_mode: "cluster"`
+- PM2 instances: `10`
+- Memory restart limit: `1G`
+- Production port: `7998`
+
+Deploy:
+
+```bash
+cd ~/aimh1-ai-portal
+git pull origin main
+docker compose up -d --build
+curl http://127.0.0.1:7998/api/health
+```
+
+Expected health response:
+
+```json
+{"ok":true}
+```
+
+## Core Capabilities
+
+The app is the Anhui Agricultural University AI portal.
+
+Main capabilities:
+
+- CAS/OAuth login, logout, and session lookup.
+- Static frontend hosting with SPA fallback when `dist/` exists.
+- Chat endpoint at `POST /api/chat/stream`, using SSE streaming.
+- Chat history list, detail lookup, single delete, and clear all.
+- Home and chat pages support three campus agents:
+  - Jiaowu Agent: `agent_id=jiaowu`
+  - AI Librarian: `agent_id=library`
+  - AI Counselor: `agent_id=xg`
+- If no campus agent is selected, chat uses the default general model.
+- If a campus agent is selected, the request must go to that Dify agent. Do not auto-route away from the selected agent.
+- Rankings endpoint: `GET /api/rankings`.
+- Agent list endpoint: `GET /api/agents`.
+- Feedback and join forms.
+- Admin observability dashboard.
+
+Important endpoints:
 
 - `GET /api/health`
 - `GET /api/auth/session`
@@ -65,85 +109,55 @@ Remove-Item "C:\path\to\file.txt"
 - `POST /api/auth/exchange`
 - `GET /callback`
 
-## Production Setup
-
-生产部署使用 Docker + PM2 cluster。
-
-- PM2 配置文件：`ecosystem.config.cjs`
-- PM2 应用名：`aimh1-portal`
-- PM2 模式：`exec_mode: "cluster"`
-- PM2 实例数：`instances: 10`
-- 单实例内存重启阈值：`max_memory_restart: "1G"`
-- 生产端口：`PORT=7998`
-
-部署命令：
-
-```bash
-cd ~/aimh1-ai-portal
-git pull origin main
-docker compose up -d --build
-curl http://127.0.0.1:7998/api/health
-```
-
-健康检查应返回：
-
-```json
-{"ok":true}
-```
-
 ## Session And Database
 
-生产环境使用 MySQL 共享 session，以支持 PM2 多实例登录态共享。
+Production uses MySQL-backed sessions so PM2 cluster instances share login state.
 
-关键配置在服务器 `server/.env`：
+Important production env settings live in `server/.env` on the server:
 
 ```env
 SESSION_STORE=mysql
 MYSQL_POOL_SIZE=15
 ```
 
-session 表固定为：
+Session table:
 
 ```text
 portal_sessions
 ```
 
-注意：
+Rules:
 
-- 不要在 GitHub 提交真实 `.env`。
-- 不要在回复中复述真实密钥、数据库密码或 API Key。
-- 如果凭据已经上传、截图或分享过，建议轮换。
+- Do not commit `server/.env`.
+- Do not print or summarize secret values.
+- Do not modify production database schema casually.
 
-## Dify And LLM Routing
+## Dify And General Model Routing
 
-路由核心在 `server/src/server.js` 和 `server/src/agentRouter.js`。
+Routing lives mainly in:
 
-当前产品逻辑：
+- `server/src/server.js`
+- `server/src/agentRouter.js`
 
-- `general`：默认模型，不展示为按钮。
-- `jiaowu`：教务智能体。
-- `library`：AI馆员。
-- `xg`：AI辅导员。
-
-当前聊天逻辑：
+Current chat routing:
 
 ```text
-用户不选按钮 -> general 默认模型
-用户选教务智能体 -> agent_id=jiaowu
-用户选AI馆员 -> agent_id=library
-用户选AI辅导员 -> agent_id=xg
+No selected button -> general default model
+Jiaowu Agent selected -> agent_id=jiaowu
+AI Librarian selected -> agent_id=library
+AI Counselor selected -> agent_id=xg
 ```
 
-首页和聊天页都遵守这个逻辑。
+The home page and chat page must follow the same routing rules.
 
-聊天页输入框上方有三个校内智能体切换按钮：
+Campus agent button behavior:
 
-- 默认都不选中。
-- 点某个按钮后，后续发送带对应 `agent_id`。
-- 再点一次已选按钮，取消选择并回到默认模型。
-- 历史记录回看时不显示切换器。
+- Default state: none selected.
+- Tap one button: select that agent.
+- Tap the same selected button again: cancel selection and return to general model.
+- History replay mode should not show the agent switcher.
 
-Dify 并发配置：
+Relevant Dify concurrency settings:
 
 ```env
 DIFY_CONNECT_TIMEOUT=15
@@ -151,78 +165,91 @@ DIFY_READ_TIMEOUT=600
 DIFY_MAX_CONCURRENT=10
 ```
 
-含义：
+Meaning:
 
-- 每个 Node 实例最多同时调用 10 个 Dify 请求。
-- PM2 10 实例时，门户侧总 Dify 并发约 100。
+- Each Node instance can call up to 10 Dify requests concurrently.
+- With 10 PM2 instances, portal-side Dify concurrency is about 100.
 
 ## Frontend Asset Rules
 
-当前前端只有打包产物，入口是 `dist/index.html`。
+The frontend currently has packaged output only. There is no reliable source build step in active use.
 
-修改前端打包产物时必须：
+Before changing frontend assets:
 
-- 先读取当前 `dist/index.html`。
-- 新建带日期/序号的新 JS/CSS 文件。
-- 更新 `dist/index.html` 引用新文件。
-- 不直接覆盖旧版本资源。
-- 不批量删除旧资源。
+1. Read the current `dist/index.html`.
+2. Create a new dated and sequenced JS/CSS file.
+3. Update `dist/index.html` to reference the new file.
+4. Do not overwrite old versioned assets directly.
+5. Do not bulk-delete old assets.
+6. Do not casually change the top brand image paths.
 
-示例：
+Example versioned files:
 
 ```text
 index-chat-agent-switch-20260527a.js
 index-chat-agent-switch-20260527a.css
+mobile-realphone-final-20260528j.css
 ```
 
-顶部品牌图路径不要随意改，继续使用当前页面引用。
+## Asset Cleanup Policy
 
-## Recent UI State
+`dist/assets` now contains many versioned JS/CSS files. Cleanup must be treated as a separate audit task.
 
-当前首页状态：
+Allowed first steps:
 
-- 首页视觉已经回到农业大学门户风格。
-- 首页保留品牌、校园图、提问框、三个校内智能体按钮、排行榜。
-- 首页三个按钮为：教务智能体、AI馆员、AI辅导员。
-- 首页默认不选按钮时走默认模型。
+1. Read `dist/index.html`.
+2. List all JS/CSS files directly referenced by `dist/index.html`.
+3. List all JS/CSS files in `dist/assets`.
+4. Search the repo for references to each candidate asset.
+5. Produce a table with these groups:
+   - `active`: directly referenced by `dist/index.html`; do not delete.
+   - `referenced`: referenced by another asset or file; do not delete without deeper review.
+   - `candidate_unused`: no reference found; still do not delete without user confirmation.
 
-当前聊天页状态：
+Forbidden cleanup behavior:
 
-- 左侧历史 + 右侧大聊天区。
-- 历史时间已修正为北京时间，不再把 MySQL `NOW()` 错误加 8 小时。
-- 用户消息靠右。
-- AI 回复靠左，透明背景，统一紧凑 Markdown 样式。
-- 发送时使用动态思考点，不提前显示空白回复框。
-- 支持历史单条删除和全部清空。
-- 输入框上方可切换三个校内智能体。
+- Do not delete by wildcard.
+- Do not delete several JS/CSS files at once.
+- Do not delete anything directly referenced by `dist/index.html`.
+- Do not delete the latest mobile UI files while production is still being verified.
+- Do not delete files just to make the folder look clean.
 
-## GitHub Collaboration
+If the user explicitly confirms one file deletion, delete only that one explicit path and then run checks.
 
-Repository collaborator settings:
+Recommended cleanup direction:
 
-```text
-https://github.com/romantic0612/aimh1-ai-portal/settings/access
-```
+- Create an asset inventory first.
+- Keep the current production set stable.
+- Consolidate future mobile overrides into fewer new files.
+- Later, restore a real frontend source build pipeline so `dist/` can be regenerated cleanly.
 
-团队协作建议：
+## Current Mobile UI State
 
-- `main`：可部署版本。
-- 前端分支：`feature/frontend-*`
-- 后台分支：`feature/admin-*`
-- 智能体中心分支：`feature/agent-center`
-- 队友不需要 SSH 登录服务器，只需要 GitHub 协作权限。
-- 服务器只从 `main` 执行 `git pull origin main`。
+Mobile pages currently being tested:
+
+- `/mobile`: fixed one-screen mobile home page with campus background, bottom input, and three campus agent buttons.
+- `/chat`: mobile chat page with history/new chat top controls, send button, and campus agent switcher.
+- `/mobile/rank`: mobile ranking page; it must allow vertical scrolling and leave enough bottom safe space for real mobile browser toolbars.
+
+Mobile layout rules:
+
+- Do not assume `100vh` equals the visible real phone area.
+- Real mobile browsers may have a top address bar, bottom toolbar, keyboard, and safe-area insets.
+- The home page can be one screen.
+- Ranking pages and chat history must be scrollable.
+- Chat composer layout must prioritize real phones over desktop preview.
+- Avoid fixed pixel widths for real phone UI.
 
 ## Useful Commands
 
-本地检查：
+Local checks:
 
 ```bash
 node --check server/src/server.js
 cd server && npm run test:router
 ```
 
-生产部署：
+Production deploy:
 
 ```bash
 cd ~/aimh1-ai-portal
@@ -231,103 +258,65 @@ docker compose up -d --build
 curl http://127.0.0.1:7998/api/health
 ```
 
-## Next Stage: Agent Center
+## Recommended Next Work
 
-下一步重点是建设“智能体中心”。
+Pause additional mobile visual patch stacking for now.
 
-智能体中心不是首页的重复版本，也不是简单链接列表。它应该承担三个作用：
+Recommended safe next steps:
 
-- 让用户快速理解学校有哪些 AI 能力可以用。
-- 让用户按场景选择合适的智能体，并进入聊天页或外部系统。
-- 让项目组以后能持续新增、下线、排序、统计智能体，而不用每次硬改首页。
+1. Create an asset inventory report. Do not delete files.
+2. Mark which JS/CSS files are currently active through `dist/index.html`.
+3. Mark older files that appear unreferenced.
+4. Let the user choose whether to delete anything.
+5. If deleting, delete one explicit file at a time.
+6. Consider rebuilding the frontend source pipeline before any major UI work.
+7. After the asset situation is clear, continue with the Agent Center page.
 
-首页继续保持轻量：
+## Agent Center Plan
 
-- 品牌。
-- 三个核心校内智能体入口。
-- 排行榜。
-- 基础提问入口。
+The next product stage is an Agent Center.
 
-智能体中心承担扩展：
+It should not be a duplicate home page or a simple link list. It should:
 
-- 校内智能体。
-- 校外智能体。
-- 建设中智能体。
-- 部门共建入口。
-- 使用数据展示。
+- Help users understand what campus AI abilities are available.
+- Let users choose agents by scenario.
+- Let the project team later add, disable, sort, and measure agents without hard-editing the home page every time.
 
-### Agent Center V1 Goal
+First version goals:
 
-第一版只做“可用、清晰、好维护”，不要一上来做复杂市场。
+- Page path: `/agents`.
+- Add or restore a top navigation entry for Agent Center.
+- Preserve the current OAuth login strategy.
+- Pin the three core campus agents:
+  - Jiaowu Agent: `agent_id=jiaowu`
+  - AI Librarian: `agent_id=library`
+  - AI Counselor: `agent_id=xg`
+- Show external tools as cards, clearly marked as external.
+- Clicking a campus agent opens `/chat?agent_id=xxx`.
+- Do not affect the current home page, chat page, rankings, feedback, join page, or admin dashboard.
 
-必须完成：
+Not in V1:
 
-- 页面路径：`/agents`。
-- 恢复或新增顶部导航“智能体中心”入口。
-- 保留现有 OAuth 登录态，不做匿名开放。
-- 三个校内核心智能体置顶：
-  - 教务智能体：`agent_id=jiaowu`
-  - AI馆员：`agent_id=library`
-  - AI辅导员：`agent_id=xg`
-- 校外智能体以介绍卡片形式展示，能跳外链或显示“建设中”。
-- 点击校内智能体时进入 `/chat?agent_id=xxx`，聊天页继续使用现有 SSE。
-- 不影响首页、聊天页、排行榜、反馈、加入申请、后台观测。
+- Favorites
+- User ratings
+- Complex permission tiers
+- Agent marketplace approval flows
+- WebSocket status
 
-暂不做：
-
-- 智能体收藏。
-- 用户评分。
-- 复杂权限分级。
-- 智能体市场审核流。
-- WebSocket 实时状态。
-
-### Page Structure
-
-智能体中心建议分四块。
-
-顶部工具区：
-
-- 标题：智能体中心
-- 副标题：选择适合的校园 AI 能力
-- 搜索框：按名称、场景、部门搜索
-- 分类 Tab：全部、校内服务、学习科研、行政办公、生活服务、校外工具
-
-核心校内智能体：
-
-- 三张重点卡片。
-- 字段包括名称、服务范围、适合问题示例、状态标签、使用次数、开始咨询按钮。
-
-校外智能体与工具：
-
-- 展示学校允许推荐的外部 AI 工具或竞赛工具。
-- 必须标明“外部工具”。
-- 涉及账号、隐私、论文、数据上传时要有提示。
-
-共建与申请：
-
-- 部门想接入智能体。
-- 学院想做知识库。
-- 学生团队想参与共建。
-- 跳转到 `/join` 或 `/feedback`。
-
-### Agent Card Fields
-
-第一版前端可以先写死，也可以读取 `/api/agents`。
-
-推荐最终由后端返回：
+Suggested agent card shape:
 
 ```json
 {
   "id": "jiaowu",
-  "name": "教务智能体",
-  "category": "校内服务",
+  "name": "Jiaowu Agent",
+  "category": "campus_service",
   "provider": "dify",
   "status": "online",
-  "summary": "课表、成绩、考试安排、培养方案等教务咨询。",
+  "summary": "Course schedule, grades, exams, and training-plan questions.",
   "examples": [
-    "这学期考试安排怎么看？",
-    "绩点怎么算？",
-    "培养方案在哪里查？"
+    "How do I check this semester's exam schedule?",
+    "How is GPA calculated?",
+    "Where can I find my training plan?"
   ],
   "entryType": "chat",
   "agentId": "jiaowu",
@@ -337,166 +326,23 @@ curl http://127.0.0.1:7998/api/health
 }
 ```
 
-状态枚举：
+Status values:
 
-- `online`：可用
-- `maintenance`：维护中
-- `building`：建设中
-- `external`：外部工具
+- `online`
+- `maintenance`
+- `building`
+- `external`
 
-入口类型：
+Entry types:
 
-- `chat`：进入本门户聊天页并带 `agent_id`
-- `external`：打开外链
-- `disabled`：只展示，不可进入
+- `chat`: open this portal's chat page with `agent_id`.
+- `external`: open an external link.
+- `disabled`: display only.
 
-### Backend Plan
+Agent Center warnings:
 
-现有接口：
-
-```text
-GET /api/agents
-```
-
-第一版可以继续复用。
-
-建议返回结构：
-
-```json
-{
-  "agents": [],
-  "categories": [],
-  "updatedAt": "2026-05-27 21:30:00"
-}
-```
-
-后续可以增加管理接口：
-
-```text
-GET /api/admin/agents
-POST /api/admin/agents
-PATCH /api/admin/agents/:id
-POST /api/admin/agents/:id/toggle
-```
-
-权限：
-
-- 普通用户只读 `/api/agents`。
-- 管理员通过 `ADMIN_USER_IDS` 访问管理接口。
-
-### Database Plan
-
-当前已有 `portal_agent_links` 概念，可以继续扩展。
-
-建议字段：
-
-```sql
-agent_id
-name
-category
-provider
-status
-summary
-detail
-examples_json
-entry_type
-target_url
-is_internal
-sort_order
-created_at
-updated_at
-```
-
-第一版不强制建新表。如果当前表字段不够，先由后端组装默认数据，保证页面能上线。
-
-### Visual Direction
-
-智能体中心应当像“校园 AI 应用工作台”，不是宣传页。
-
-风格建议：
-
-- 背景浅绿色或白色。
-- 卡片 8px 圆角以内。
-- 信息密度比首页高。
-- 使用状态标签、分类 Tab、搜索框、紧凑卡片。
-- 三个校内智能体可以更醒目，但不要做超大 Hero。
-
-卡片布局：
-
-```text
-左上：名称 + 状态
-中间：简介 + 适合问题
-底部：分类标签 + 开始咨询按钮
-```
-
-移动端：
-
-- 单列卡片。
-- 搜索框固定在列表上方。
-- Tab 可横向滚动。
-- 按钮不可撑破卡片。
-
-### Development Steps
-
-第一步：静态可用版
-
-- 恢复或新增顶部“智能体中心”入口。
-- 新建 `/agents` 页面。
-- 写死三大校内智能体和若干校外工具。
-- 点击校内智能体跳 `/chat?agent_id=xxx`。
-- 页面不依赖新数据库。
-
-第二步：接口驱动版
-
-- `/api/agents` 返回统一字段。
-- 页面从接口读取。
-- 后端保留默认兜底数据，数据库异常时页面不空白。
-- 后台观测台增加“智能体调用概览”。
-
-第三步：管理配置版
-
-- 后台 `/admin` 增加智能体管理。
-- 管理员可以改名称、简介、状态、排序、外链。
-- 支持上线/下线。
-- 支持查看每个智能体使用次数、错误率、平均耗时。
-
-### Acceptance Criteria
-
-功能：
-
-- `/agents` 可访问。
-- 三个校内智能体能正确进入聊天页。
-- 外部工具能正确打开或显示建设中。
-- 搜索和分类可用。
-- 不影响首页和聊天页当前功能。
-
-接口：
-
-- `/api/agents` 正常返回。
-- 数据库异常时有兜底数据。
-- 未登录用户按当前门户策略处理。
-
-视觉：
-
-- 页面不像旧版静态链接页。
-- 三个核心智能体足够明显。
-- 信息密度适合电脑端重复使用。
-- 移动端不溢出、不重叠。
-
-部署：
-
-```bash
-node --check server/src/server.js
-cd server && npm run test:router
-docker compose up -d --build
-curl http://127.0.0.1:7998/api/health
-```
-
-### Agent Center Warnings
-
-- 不要把真实 API Key、数据库密码、CAS secret 写进页面或 GitHub。
-- 不要为了智能体中心重写聊天接口。
-- 不要恢复旧的人事/农小新入口为核心入口，除非用户明确要求。
-- 不要把外部工具称为校内智能体。
-- 不要批量删除旧前端资源。
-- 前端打包产物仍然要新建版本化 JS/CSS，再更新 `dist/index.html`。
+- Do not write real secrets into frontend code or GitHub.
+- Do not rewrite the chat API for Agent Center.
+- Do not restore old personnel or deprecated entries as core entries unless the user explicitly asks.
+- Do not call external tools campus agents.
+- Do not bulk-delete old frontend assets.
