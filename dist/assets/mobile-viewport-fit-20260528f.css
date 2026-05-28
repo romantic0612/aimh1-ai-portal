@@ -1,0 +1,117 @@
+html.mobile-chat-frame,
+html.mobile-chat-frame body,
+html.mobile-chat-frame #app,
+html.mobile-chat-frame .page,
+html.mobile-chat-frame .chat-main {
+  height: var(--mobile-vh, 100dvh) !important;
+  min-height: var(--mobile-vh, 100dvh) !important;
+  max-height: var(--mobile-vh, 100dvh) !important;
+  overflow: hidden !important;
+}
+
+html.mobile-chat-frame .chat-main {
+  padding-top: 54px !important;
+  padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.mobile-chat-frame .chat-workspace,
+html.mobile-chat-frame .chat-center {
+  height: calc(var(--mobile-vh, 100dvh) - 54px - 132px - env(safe-area-inset-bottom, 0px)) !important;
+  min-height: 0 !important;
+  max-height: calc(var(--mobile-vh, 100dvh) - 54px - 132px - env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.mobile-chat-frame .chat-window {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+html.mobile-chat-frame .mobile-chat-topbar {
+  height: 54px !important;
+}
+
+html.mobile-chat-frame .chat-sidebar {
+  height: var(--mobile-vh, 100dvh) !important;
+  max-height: var(--mobile-vh, 100dvh) !important;
+}
+
+html.mobile-chat-frame .mobile-chat-drawer-mask {
+  height: var(--mobile-vh, 100dvh) !important;
+}
+
+@media (max-height: 720px) {
+  html.mobile-chat-frame .chat-main {
+    padding-top: 50px !important;
+    padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html.mobile-chat-frame .mobile-chat-topbar {
+    height: 50px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  html.mobile-chat-frame .mobile-chat-history,
+  html.mobile-chat-frame .mobile-chat-new {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  html.mobile-chat-frame .chat-workspace,
+  html.mobile-chat-frame .chat-center {
+    height: calc(var(--mobile-vh, 100dvh) - 50px - 118px - env(safe-area-inset-bottom, 0px)) !important;
+    max-height: calc(var(--mobile-vh, 100dvh) - 50px - 118px - env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html.mobile-chat-frame .chat-agent-switch {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    height: 38px !important;
+    padding: 4px 6px !important;
+  }
+
+  html.mobile-chat-frame .chat-agent-switch button {
+    height: 28px !important;
+    font-size: 12px !important;
+  }
+
+  html.mobile-chat-frame .chat-input {
+    min-height: 54px !important;
+    padding: 6px !important;
+  }
+
+  html.mobile-chat-frame .chat-input input,
+  html.mobile-chat-frame .chat-input button[type="submit"] {
+    height: 42px !important;
+  }
+}
+
+@media (max-height: 640px) {
+  html.mobile-chat-frame .chat-main {
+    padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html.mobile-chat-frame .chat-workspace,
+  html.mobile-chat-frame .chat-center {
+    height: calc(var(--mobile-vh, 100dvh) - 50px - 108px - env(safe-area-inset-bottom, 0px)) !important;
+    max-height: calc(var(--mobile-vh, 100dvh) - 50px - 108px - env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html.mobile-chat-frame .chat-agent-switch {
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html.mobile-chat-frame .chat-sidebar {
+    padding-top: 20px !important;
+  }
+
+  .mobile-history-search {
+    height: 44px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .mobile-history-group {
+    margin: 14px 0 8px !important;
+  }
+}
