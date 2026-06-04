@@ -35,32 +35,30 @@ Do not repeat real secrets in replies.
 
 ## Project Shape
 
-This is a packaged frontend plus Node/Express backend project.
+This migration branch is moving the packaged frontend plus Node/Express backend project to ThinkPHP 5.1, Vue, Nginx, and Docker.
 
 - Static frontend output is in `dist/`.
 - Frontend entry file is `dist/index.html`.
-- Backend code is in `server/`.
-- Backend entry file is `server/src/server.js`.
-- Backend scripts are in `server/package.json`: `npm run dev` and `npm start`.
-- Production can run with `ecosystem.config.cjs` and PM2 cluster mode.
+- New ThinkPHP backend code is in `backend/`.
+- New PHP backend entry file is `backend/public/index.php`.
+- Legacy Node backend code remains in `server/` for comparison during migration.
+- Legacy Node backend entry file is `server/src/server.js`.
+- New Vue workspace is in `frontend/`, but it must not overwrite `dist/` until page-by-page verification is complete.
+- Production on this branch runs with Docker Compose, Nginx, and PHP-FPM.
 - GitHub repository: `https://github.com/romantic0612/aimh1-ai-portal.git`.
 - Production domain: `https://sjaigc.ahau.edu.cn/`.
 
 ## Production Setup
 
-Production uses Docker plus PM2 cluster.
+On this migration branch, production uses Docker Compose with Nginx plus PHP-FPM. The old PM2 cluster setup remains as legacy reference only.
 
-- PM2 app name: `aimh1-portal`
-- PM2 mode: `exec_mode: "cluster"`
-- PM2 instances: `10`
-- Memory restart limit: `1G`
 - Production port: `7998`
 
 Deploy:
 
 ```bash
 cd ~/aimh1-ai-portal
-git pull origin main
+git pull origin codex/tp51-vue-nginx-docker-migration
 docker compose up -d --build
 curl http://127.0.0.1:7998/api/health
 ```
@@ -111,12 +109,11 @@ Important endpoints:
 
 ## Session And Database
 
-Production uses MySQL-backed sessions so PM2 cluster instances share login state.
+Legacy Node production used MySQL-backed sessions so PM2 cluster instances shared login state. The TP5.1 migration branch currently uses ThinkPHP's default session handling and still needs MySQL-backed PHP session storage before multi-instance production rollout.
 
 Important production env settings live in `server/.env` on the server:
 
 ```env
-SESSION_STORE=mysql
 MYSQL_POOL_SIZE=15
 ```
 
@@ -167,8 +164,8 @@ DIFY_MAX_CONCURRENT=10
 
 Meaning:
 
-- Each Node instance can call up to 10 Dify requests concurrently.
-- With 10 PM2 instances, portal-side Dify concurrency is about 100.
+- The legacy Node service allowed each Node instance to call up to 10 Dify requests concurrently.
+- The TP5.1 migration should reintroduce equivalent concurrency control before high-traffic production rollout.
 
 ## Frontend Asset Rules
 

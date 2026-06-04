@@ -1,5 +1,9 @@
 node_modules
 server/node_modules
+frontend/node_modules
+backend/vendor
+backend/runtime
+dist-vue
 .git
 .gitignore
 .env
