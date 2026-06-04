@@ -371,3 +371,140 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch button[aria-pressed="tr
   background: #0c8f61 !important;
   color: #fff !important;
 }
+
+/* 20260604: make chat composer follow the mobile home composer layout. */
+html.mobile-chat-frame .chat-input,
+html.mobile-chat-frame.mobile-preview .chat-input {
+  position: fixed !important;
+  left: max(14px, env(safe-area-inset-left, 0px)) !important;
+  right: max(14px, env(safe-area-inset-right, 0px)) !important;
+  bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 96 !important;
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) 58px !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: auto !important;
+  max-width: none !important;
+  min-height: 62px !important;
+  margin: 0 !important;
+  padding: 7px 8px 7px 10px !important;
+  transform: none !important;
+  border: 1px solid rgba(14, 126, 87, 0.34) !important;
+  border-radius: 999px !important;
+  background: rgba(245, 250, 246, 0.96) !important;
+  box-shadow: 0 4px 18px rgba(12, 89, 61, 0.12) !important;
+  box-sizing: border-box !important;
+}
+
+html.mobile-chat-frame .chat-input::before,
+html.mobile-chat-frame.mobile-preview .chat-input::before {
+  content: "" !important;
+  display: block !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  background: #fff url("/logo.png") center / 34px 34px no-repeat !important;
+  box-shadow: 0 4px 14px rgba(12, 89, 61, 0.14) !important;
+}
+
+html.mobile-chat-frame .chat-input input,
+html.mobile-chat-frame.mobile-preview .chat-input input {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #23392f !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+}
+
+html.mobile-chat-frame .chat-input input::placeholder,
+html.mobile-chat-frame.mobile-preview .chat-input input::placeholder {
+  color: rgba(58, 72, 64, 0.58) !important;
+}
+
+html.mobile-chat-frame .chat-input button[type="submit"],
+html.mobile-chat-frame.mobile-preview .chat-input button[type="submit"] {
+  width: 58px !important;
+  min-width: 58px !important;
+  height: 50px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #0c8f61 !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 8px 20px rgba(12, 143, 97, 0.2) !important;
+}
+
+html.mobile-chat-frame .chat-input button[type="submit"]:disabled,
+html.mobile-chat-frame.mobile-preview .chat-input button[type="submit"]:disabled {
+  background: #a8d8c8 !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+  box-shadow: none !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch,
+html.mobile-chat-frame.mobile-preview .chat-agent-switch {
+  position: fixed !important;
+  left: max(14px, env(safe-area-inset-left, 0px)) !important;
+  right: max(14px, env(safe-area-inset-right, 0px)) !important;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 95 !important;
+  display: flex !important;
+  gap: 8px !important;
+  width: auto !important;
+  max-width: none !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: auto !important;
+  transform: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch button,
+html.mobile-chat-frame.mobile-preview .chat-agent-switch button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 10px !important;
+  border: 1px solid rgba(14, 126, 87, 0.38) !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: #184a38 !important;
+  font-size: 14px !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch button.active,
+html.mobile-chat-frame .chat-agent-switch button[aria-pressed="true"],
+html.mobile-chat-frame.mobile-preview .chat-agent-switch button.active,
+html.mobile-chat-frame.mobile-preview .chat-agent-switch button[aria-pressed="true"] {
+  border-color: #0c8f61 !important;
+  background: #0c8f61 !important;
+  color: #fff !important;
+}
+
+html.mobile-chat-frame.mobile-keyboard-open .chat-input,
+html.mobile-chat-frame.mobile-preview.mobile-keyboard-open .chat-input {
+  bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.mobile-chat-frame.mobile-keyboard-open .chat-agent-switch,
+html.mobile-chat-frame.mobile-preview.mobile-keyboard-open .chat-agent-switch {
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+}
