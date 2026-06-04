@@ -76,6 +76,8 @@
       .replace(/^\s*[-－]\s*$/gm, "")
       .replace(/([^\n])(?=#{1,6}[^\s#\n])/g, "$1\n\n")
       .replace(/(^|\n)(#{1,6})([^\s#\n])/g, "$1$2 $3")
+      .replace(/([:：])\s*-\s*(?=\[)/g, "$1\n\n- ")
+      .replace(/\)\s*-\s*(?=\[)/g, ")\n- ")
       .replace(/([^\n])(?=(?:具体要求|核心计算公式|注意事项|数据口径|查询结果|统计结果|办理流程|所需材料|办理入口|办理时限)\s*\d*[.．、]?\S)/g, "$1\n\n")
       .replace(/([^\n\sA-Za-z0-9/:._?&=%-])(?=\d+[.．、]\s*\S)/g, "$1\n")
       .replace(/(#{1,6}\s*关于[^\n#。；，,]*?情况说明)(?=\S)/g, "$1\n\n")
@@ -140,12 +142,12 @@
     let text = escapeHtml(value);
 
     text = text.replace(/`([^`\n]+)`/g, (_m, code) => stash.put(`<code>${escapeHtml(code)}</code>`));
-    text = text.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (match, alt, href) => {
-      const url = safeUrl(href);
+    text = text.replace(/!\[([^\]]*)\]\(\s*([^)]+?)\s*\)/g, (match, alt, href) => {
+      const url = safeUrl(href.trim());
       return url ? stash.put(`<img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" class="chat-image" loading="lazy" />`) : escapeHtml(match);
     });
-    text = text.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (match, label, href) => {
-      const url = safeUrl(href);
+    text = text.replace(/\[([^\]]+)\]\(\s*([^)]+?)\s*\)/g, (match, label, href) => {
+      const url = safeUrl(href.trim());
       return url ? stash.put(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${inlineMarkdown(label)}</a>`) : escapeHtml(match);
     });
     text = text.replace(/(^|[\s(\uFF08:\uFF1A])((https?:\/\/[^\s<>"']+))/gi, (match, prefix, rawUrl) => {
