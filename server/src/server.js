@@ -1458,6 +1458,42 @@ function writeSse(res, payload) {
   return true;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function splitAnswerForStreaming(content) {
+  const text = String(content || "");
+  if (!text) return [];
+  const chunks = [];
+  let buffer = "";
+
+  for (const char of text) {
+    buffer += char;
+    const shouldFlush =
+      buffer.length >= 36 ||
+      (buffer.length >= 14 && /[。！？；;.!?\n]$/.test(buffer)) ||
+      (buffer.length >= 22 && /[,，、]\s*$/.test(buffer));
+    if (shouldFlush) {
+      chunks.push(buffer);
+      buffer = "";
+    }
+  }
+
+  if (buffer) chunks.push(buffer);
+  return chunks;
+}
+
+async function writeAnswerChunks(res, payload, content, { paced = false } = {}) {
+  const chunks = splitAnswerForStreaming(content);
+  for (const chunk of chunks) {
+    const ok = writeSse(res, { ...payload, content: chunk });
+    if (!ok) return false;
+    if (paced) await sleep(18);
+  }
+  return true;
+}
+
 function mockAgentAnswer(message, agent) {
   return [
     `${agent.name}已收到你的问题：“${message}”。`,
@@ -1549,6 +1585,7 @@ async function streamDifyWorkflowAnswer({ res, message, user, agent, inputs = {}
       let answer = "";
       let latestUsage = normalizeUsage();
       let latestEvent = null;
+      let streamedWorkflowText = "";
 
       while (true) {
         const { value, done } = await reader.read();
@@ -1575,14 +1612,32 @@ async function streamDifyWorkflowAnswer({ res, message, user, agent, inputs = {}
           latestUsage = mergeUsage(latestUsage, usageFromEvent(event));
           const content = extractDifyWorkflowEventContent(event);
           if (typeof content === "string" && content) {
-            answer += content;
+            const eventName = getDifyEventName(event);
+            let emitContent = content;
+            if (eventName === "workflow_finished" && streamedWorkflowText.trim()) {
+              const streamed = streamedWorkflowText.trim();
+              const finished = content.trim();
+              if (finished === streamed) {
+                emitContent = "";
+              } else if (finished.startsWith(streamed)) {
+                emitContent = finished.slice(streamed.length);
+              }
+            }
+            if (eventName !== "workflow_finished") {
+              streamedWorkflowText += emitContent;
+            }
+            answer += emitContent;
             if (emitChunks && res) {
-              writeSse(res, {
-                type: "answer_chunk",
-                content,
-                tool_name: agent.toolName,
-                conversation_id: ""
-              });
+              await writeAnswerChunks(
+                res,
+                {
+                  type: "answer_chunk",
+                  tool_name: agent.toolName,
+                  conversation_id: ""
+                },
+                emitContent,
+                { paced: eventName === "workflow_finished" }
+              );
             }
           }
         }
