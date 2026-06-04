@@ -1,4 +1,4 @@
-function syncMobilePreviewClass(){const p=location.pathname;document.documentElement.classList.toggle("mobile-preview",p.startsWith("/mobile"));document.documentElement.classList.toggle("mobile-rank",p.startsWith("/mobile/rank"));document.documentElement.classList.toggle("mobile-home-frame",p==="/mobile"||p==="/mobile/")}function getMobileHomeAgentId(){const e=document.querySelector(".portal-composer .agent-chip.active"),t=e?e.textContent||"":"";return t.includes("\u6559\u52a1")?"jiaowu":t.includes("\u9986\u5458")?"library":t.includes("\u8f85\u5bfc\u5458")?"xg":""}function submitMobileHomeQuestion(e){if(!location.pathname.startsWith("/mobile")||location.pathname.startsWith("/mobile/rank"))return!1;const t=(e&&e.value||document.querySelector(".portal-composer input")?.value||"").trim();if(!t)return!1;const n=new URL("/chat",location.origin);n.searchParams.set("q",t);const s=getMobileHomeAgentId();s&&n.searchParams.set("agent_id",s);setTimeout(()=>{location.href=n.pathname+n.search},30);return!0}function bindMobileHomeComposer(){document.addEventListener("keydown",e=>{e.key==="Enter"&&e.target&&e.target.matches&&e.target.matches(".portal-composer input")&&(e.preventDefault(),e.stopImmediatePropagation(),submitMobileHomeQuestion(e.target))},!0),document.addEventListener("submit",e=>{e.target&&e.target.matches&&e.target.matches(".portal-composer")&&location.pathname.startsWith("/mobile")&&(e.preventDefault(),e.stopImmediatePropagation(),submitMobileHomeQuestion(e.target.querySelector("input")))},!0)}function mobileHomeEscape(e){return String(e||"").replace(/[&<>]/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[t]))}function mobileHomeFrameInit(){if(!location.pathname.startsWith("/mobile"))return;const e=document.body;if(!e||document.querySelector(".mobile-frame-topbar"))return;const t=document.createElement("div");t.className="mobile-frame-topbar";t.innerHTML='<button class="mobile-frame-menu" type="button" aria-label="history"><span></span><span></span></button><nav class="mobile-frame-tabs" aria-label="mobile navigation"><a class="active" href="/mobile">\u9996\u9875</a><a href="/chat">\u5bf9\u8bdd</a><a href="/mobile/rank">\u6392\u884c\u699c</a></nav><button class="mobile-frame-new" type="button" aria-label="new chat">+</button>';const n=document.createElement("div");n.className="mobile-history-overlay";n.innerHTML='<aside class="mobile-history-drawer" aria-label="history"><div class="mobile-history-head"><strong>\u5386\u53f2\u4f1a\u8bdd</strong><button type="button" aria-label="close">x</button></div><div class="mobile-history-list"><p>\u6b63\u5728\u52a0\u8f7d...</p></div></aside>';e.append(t,n);if(!document.querySelector(".mobile-frame-composer")){const m=document.createElement("form");m.className="mobile-frame-composer";m.innerHTML='<div class="mobile-frame-input-row"><span class="mobile-frame-logo"><img src="/logo.png" alt=""></span><input type="search" enterkeyhint="send" placeholder="\u7ed9\u519c\u82af\u667a AI \u53d1\u9001\u6d88\u606f"></div><div class="mobile-frame-agent-row"><button type="button" data-agent="jiaowu">\u6559\u52a1\u667a\u80fd\u4f53</button><button type="button" data-agent="library">AI\u9986\u5458</button><button type="button" data-agent="xg">AI\u8f85\u5bfc\u5458</button></div><button class="mobile-frame-submit" type="submit" aria-label="send"></button>';e.appendChild(m);let g="";m.querySelectorAll("[data-agent]").forEach(btn=>btn.addEventListener("click",()=>{g=g===btn.dataset.agent?"":btn.dataset.agent;m.querySelectorAll("[data-agent]").forEach(x=>x.classList.toggle("active",x.dataset.agent===g))}));const sendFrame=()=>{const input=m.querySelector("input"),q=(input.value||"").trim();if(!q)return;const url=new URL("/chat",location.origin);url.searchParams.set("q",q);g&&url.searchParams.set("agent_id",g);setTimeout(()=>{location.href=url.pathname+url.search},50)};window.__mobileFrameSend=sendFrame;["keydown","keypress","keyup"].forEach(type=>document.addEventListener(type,ev=>{ev.key==="Enter"&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest(".mobile-frame-composer")&&(ev.preventDefault(),ev.stopImmediatePropagation(),window.__mobileFrameSend&&window.__mobileFrameSend())},!0));m.querySelector("input").addEventListener("keydown",ev=>{ev.key==="Enter"&&(ev.preventDefault(),ev.stopImmediatePropagation(),sendFrame())},!0);m.querySelector("input").addEventListener("search",ev=>{ev.preventDefault();sendFrame()},!0);m.addEventListener("submit",ev=>{ev.preventDefault();sendFrame()})}const s=n.querySelector(".mobile-history-list"),i=()=>n.classList.remove("open"),r=async()=>{n.classList.add("open");s.innerHTML="<p>\u6b63\u5728\u52a0\u8f7d...</p>";try{const o=await fetch("/api/chat/history",{credentials:"include"}),l=await o.json().catch(()=>({})),a=(l.success&&l.data&&l.data.sessionList||[]).slice(0,30);s.innerHTML=a.length?a.map(c=>{const f=mobileHomeEscape(c.sessionId||""),u=mobileHomeEscape(String(c.sessionTitle||"\u65b0\u5bf9\u8bdd").replace(/^\\[[^\\]]+\\]\\s*/,"")),h=mobileHomeEscape(c.displayTime||c.updateTime||c.createTime||"").slice(0,16);return`<button type="button" data-session="${f}"><strong>${u}</strong><small>${h}</small></button>`}).join(""):"<p>\u6682\u65e0\u5386\u53f2\u4f1a\u8bdd</p>"}catch{s.innerHTML="<p>\u5386\u53f2\u4f1a\u8bdd\u52a0\u8f7d\u5931\u8d25</p>"}};t.querySelector(".mobile-frame-menu").addEventListener("click",r);n.addEventListener("click",o=>{o.target===n&&i()});n.querySelector(".mobile-history-head button").addEventListener("click",i);s.addEventListener("click",o=>{const l=o.target.closest("button[data-session]");if(!l)return;const a=new URL("/chat",location.origin);a.searchParams.set("session_id",l.dataset.session||"");location.href=a.pathname+a.search});t.querySelector(".mobile-frame-new").addEventListener("click",()=>{const o=document.querySelector(".portal-composer input");o&&(o.value="",o.dispatchEvent(new Event("input",{bubbles:!0})));document.querySelectorAll(".portal-composer .agent-chip.active").forEach(l=>l.click())})}syncMobilePreviewClass();bindMobileHomeComposer();addEventListener("popstate",()=>{syncMobilePreviewClass();mobileHomeFrameInit()});function wireMobileHomeForm(){if(!location.pathname.startsWith("/mobile")||location.pathname.startsWith("/mobile/rank"))return;const e=document.querySelector(".portal-composer"),t=e&&e.querySelector("input");if(t&&!t.dataset.mobileFrameBound){t.dataset.mobileFrameBound="1";t.addEventListener("keydown",n=>{n.key==="Enter"&&(n.preventDefault(),n.stopImmediatePropagation(),submitMobileHomeQuestion(t))},!0)}if(e&&!e.dataset.mobileFrameBound){e.dataset.mobileFrameBound="1";e.addEventListener("submit",n=>{n.preventDefault(),n.stopImmediatePropagation(),submitMobileHomeQuestion(t||e.querySelector("input"))},!0)}}document.addEventListener("DOMContentLoaded",()=>{mobileHomeFrameInit();wireMobileHomeForm()});setTimeout(()=>{mobileHomeFrameInit();wireMobileHomeForm()},300);setTimeout(wireMobileHomeForm,900);
+function syncMobilePreviewClass(){const p=location.pathname;document.documentElement.classList.toggle("mobile-preview",p.startsWith("/mobile"));document.documentElement.classList.toggle("mobile-rank",p.startsWith("/mobile/rank"));document.documentElement.classList.toggle("mobile-home-frame",p==="/mobile"||p==="/mobile/")}function getMobileHomeAgentId(){const e=document.querySelector(".portal-composer .agent-chip.active"),t=e?e.textContent||"":"";return t.includes("\u6559\u52a1")?"jiaowu":t.includes("\u9986\u5458")?"library":t.includes("\u8f85\u5bfc\u5458")?"xg":t.includes("\u95ee\u6570")?"data":t.includes("\u529e\u4e8b")?"service":""}function submitMobileHomeQuestion(e){if(!location.pathname.startsWith("/mobile")||location.pathname.startsWith("/mobile/rank"))return!1;const t=(e&&e.value||document.querySelector(".portal-composer input")?.value||"").trim();if(!t)return!1;const n=new URL("/chat",location.origin);n.searchParams.set("q",t);const s=getMobileHomeAgentId();s&&n.searchParams.set("agent_id",s);setTimeout(()=>{location.href=n.pathname+n.search},30);return!0}function bindMobileHomeComposer(){document.addEventListener("keydown",e=>{e.key==="Enter"&&e.target&&e.target.matches&&e.target.matches(".portal-composer input")&&(e.preventDefault(),e.stopImmediatePropagation(),submitMobileHomeQuestion(e.target))},!0),document.addEventListener("submit",e=>{e.target&&e.target.matches&&e.target.matches(".portal-composer")&&location.pathname.startsWith("/mobile")&&(e.preventDefault(),e.stopImmediatePropagation(),submitMobileHomeQuestion(e.target.querySelector("input")))},!0)}function mobileHomeEscape(e){return String(e||"").replace(/[&<>]/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[t]))}function mobileHomeFrameInit(){if(!location.pathname.startsWith("/mobile"))return;const e=document.body;if(!e||document.querySelector(".mobile-frame-topbar"))return;const t=document.createElement("div");t.className="mobile-frame-topbar";t.innerHTML='<button class="mobile-frame-menu" type="button" aria-label="history"><span></span><span></span></button><nav class="mobile-frame-tabs" aria-label="mobile navigation"><a class="active" href="/mobile">\u9996\u9875</a><a href="/chat">\u5bf9\u8bdd</a><a href="/mobile/rank">\u6392\u884c\u699c</a></nav><button class="mobile-frame-new" type="button" aria-label="new chat">+</button>';const n=document.createElement("div");n.className="mobile-history-overlay";n.innerHTML='<aside class="mobile-history-drawer" aria-label="history"><div class="mobile-history-head"><strong>\u5386\u53f2\u4f1a\u8bdd</strong><button type="button" aria-label="close">x</button></div><div class="mobile-history-list"><p>\u6b63\u5728\u52a0\u8f7d...</p></div></aside>';e.append(t,n);if(!document.querySelector(".mobile-frame-composer")){const m=document.createElement("form");m.className="mobile-frame-composer";m.innerHTML='<div class="mobile-frame-input-row"><span class="mobile-frame-logo"><img src="/logo.png" alt=""></span><input type="search" enterkeyhint="send" placeholder="\u7ed9\u519c\u82af\u667a AI \u53d1\u9001\u6d88\u606f"></div><div class="mobile-frame-agent-row"><button type="button" data-agent="jiaowu">\u6559\u52a1\u667a\u80fd\u4f53</button><button type="button" data-agent="library">AI\u9986\u5458</button><button type="button" data-agent="xg">AI\u8f85\u5bfc\u5458</button><button type="button" data-agent="data">AI\u95ee\u6570</button><button type="button" data-agent="service">AI\u529e\u4e8b</button></div><button class="mobile-frame-submit" type="submit" aria-label="send"></button>';e.appendChild(m);let g="";m.querySelectorAll("[data-agent]").forEach(btn=>btn.addEventListener("click",()=>{g=g===btn.dataset.agent?"":btn.dataset.agent;m.querySelectorAll("[data-agent]").forEach(x=>x.classList.toggle("active",x.dataset.agent===g))}));const sendFrame=()=>{const input=m.querySelector("input"),q=(input.value||"").trim();if(!q)return;const url=new URL("/chat",location.origin);url.searchParams.set("q",q);g&&url.searchParams.set("agent_id",g);setTimeout(()=>{location.href=url.pathname+url.search},50)};window.__mobileFrameSend=sendFrame;["keydown","keypress","keyup"].forEach(type=>document.addEventListener(type,ev=>{ev.key==="Enter"&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest(".mobile-frame-composer")&&(ev.preventDefault(),ev.stopImmediatePropagation(),window.__mobileFrameSend&&window.__mobileFrameSend())},!0));m.querySelector("input").addEventListener("keydown",ev=>{ev.key==="Enter"&&(ev.preventDefault(),ev.stopImmediatePropagation(),sendFrame())},!0);m.querySelector("input").addEventListener("search",ev=>{ev.preventDefault();sendFrame()},!0);m.addEventListener("submit",ev=>{ev.preventDefault();sendFrame()})}const s=n.querySelector(".mobile-history-list"),i=()=>n.classList.remove("open"),r=async()=>{n.classList.add("open");s.innerHTML="<p>\u6b63\u5728\u52a0\u8f7d...</p>";try{const o=await fetch("/api/chat/history",{credentials:"include"}),l=await o.json().catch(()=>({})),a=(l.success&&l.data&&l.data.sessionList||[]).slice(0,30);s.innerHTML=a.length?a.map(c=>{const f=mobileHomeEscape(c.sessionId||""),u=mobileHomeEscape(String(c.sessionTitle||"\u65b0\u5bf9\u8bdd").replace(/^\\[[^\\]]+\\]\\s*/,"")),h=mobileHomeEscape(c.displayTime||c.updateTime||c.createTime||"").slice(0,16);return`<button type="button" data-session="${f}"><strong>${u}</strong><small>${h}</small></button>`}).join(""):"<p>\u6682\u65e0\u5386\u53f2\u4f1a\u8bdd</p>"}catch{s.innerHTML="<p>\u5386\u53f2\u4f1a\u8bdd\u52a0\u8f7d\u5931\u8d25</p>"}};t.querySelector(".mobile-frame-menu").addEventListener("click",r);n.addEventListener("click",o=>{o.target===n&&i()});n.querySelector(".mobile-history-head button").addEventListener("click",i);s.addEventListener("click",o=>{const l=o.target.closest("button[data-session]");if(!l)return;const a=new URL("/chat",location.origin);a.searchParams.set("session_id",l.dataset.session||"");location.href=a.pathname+a.search});t.querySelector(".mobile-frame-new").addEventListener("click",()=>{const o=document.querySelector(".portal-composer input");o&&(o.value="",o.dispatchEvent(new Event("input",{bubbles:!0})));document.querySelectorAll(".portal-composer .agent-chip.active").forEach(l=>l.click())})}syncMobilePreviewClass();bindMobileHomeComposer();addEventListener("popstate",()=>{syncMobilePreviewClass();mobileHomeFrameInit()});function wireMobileHomeForm(){if(!location.pathname.startsWith("/mobile")||location.pathname.startsWith("/mobile/rank"))return;const e=document.querySelector(".portal-composer"),t=e&&e.querySelector("input");if(t&&!t.dataset.mobileFrameBound){t.dataset.mobileFrameBound="1";t.addEventListener("keydown",n=>{n.key==="Enter"&&(n.preventDefault(),n.stopImmediatePropagation(),submitMobileHomeQuestion(t))},!0)}if(e&&!e.dataset.mobileFrameBound){e.dataset.mobileFrameBound="1";e.addEventListener("submit",n=>{n.preventDefault(),n.stopImmediatePropagation(),submitMobileHomeQuestion(t||e.querySelector("input"))},!0)}}document.addEventListener("DOMContentLoaded",()=>{mobileHomeFrameInit();wireMobileHomeForm()});setTimeout(()=>{mobileHomeFrameInit();wireMobileHomeForm()},300);setTimeout(wireMobileHomeForm,900);
 ﻿(function(){const t=document.createElement("link").relList;if(t&&t.supports&&t.supports("modulepreload"))return;for(const i of document.querySelectorAll('link[rel="modulepreload"]'))s(i);new MutationObserver(i=>{for(const r of i)if(r.type==="childList")for(const o of r.addedNodes)o.tagName==="LINK"&&o.rel==="modulepreload"&&s(o)}).observe(document,{childList:!0,subtree:!0});function n(i){const r={};return i.integrity&&(r.integrity=i.integrity),i.referrerPolicy&&(r.referrerPolicy=i.referrerPolicy),i.crossOrigin==="use-credentials"?r.credentials="include":i.crossOrigin==="anonymous"?r.credentials="omit":r.credentials="same-origin",r}function s(i){if(i.ep)return;i.ep=!0;const r=n(i);fetch(i.href,r)}})();/**
 * @vue/shared v3.5.33
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
@@ -403,3 +403,100 @@ function syncMobilePreviewClass(){const p=location.pathname;document.documentEle
       </section>
     </main>
   `},vb=rb({history:Fv(),routes:[{path:"/",name:"home",component:za},{path:"/mobile",name:"mobile",component:za},{path:"/mobile/rank",name:"mobile-rank",component:za},{path:"/callback",name:"callback",component:za},{path:"/agents",name:"agents",component:pb},{path:"/feedback",name:"feedback",component:mb},{path:"/join",name:"join",component:gb},{path:"/chat",name:"chat",component:yb}]});qi(db).use(vb).mount("#app");
+
+/* 20260604a: add AI data/service agents without creating another frontend asset. */
+(function(){
+  const extraAgents=[{id:"data",name:"AI问数"},{id:"service",name:"AI办事"}];
+  const validExtraIds=new Set(extraAgents.map(agent=>agent.id));
+  let selectedExtraAgent="";
+  function getQueryAgent(){try{return new URLSearchParams(location.search).get("agent_id")||""}catch{return""}}
+  function clearOriginalActive(row){row.querySelectorAll(".agent-chip.active,.chat-agent-chip.active").forEach(button=>button.classList.remove("active"))}
+  function setExtraActive(row,agentId){
+    selectedExtraAgent=validExtraIds.has(agentId)?agentId:"";
+    row.querySelectorAll("[data-extra-agent]").forEach(button=>{
+      button.classList.toggle("active",button.dataset.extraAgent===selectedExtraAgent);
+    });
+  }
+  function addButtons(row,buttonClass){
+    if(!row||row.dataset.extraAgentsReady)return;
+    row.dataset.extraAgentsReady="1";
+    const initial=getQueryAgent();
+    extraAgents.forEach(agent=>{
+      const button=document.createElement("button");
+      button.type="button";
+      button.className=buttonClass;
+      button.dataset.extraAgent=agent.id;
+      button.textContent=agent.name;
+      button.addEventListener("click",event=>{
+        event.preventDefault();
+        event.stopPropagation();
+        const next=selectedExtraAgent===agent.id?"":agent.id;
+        clearOriginalActive(row);
+        setExtraActive(row,next);
+      });
+      row.appendChild(button);
+    });
+    row.addEventListener("click",event=>{
+      if(event.target&&event.target.closest&&event.target.closest("[data-extra-agent]"))return;
+      selectedExtraAgent="";
+      setExtraActive(row,"");
+    },true);
+    if(validExtraIds.has(initial)){
+      clearOriginalActive(row);
+      setExtraActive(row,initial);
+    }
+  }
+  function homeQuestion(form){return String(form?.querySelector("input")?.value||"").trim()}
+  function goChat(question){
+    const url=new URL("/chat",location.origin);
+    url.searchParams.set("q",question);
+    url.searchParams.set("agent_id",selectedExtraAgent);
+    location.href=url.pathname+url.search;
+  }
+  function bindHomeSubmit(form){
+    if(!form||form.dataset.extraAgentSubmitReady)return;
+    form.dataset.extraAgentSubmitReady="1";
+    form.addEventListener("submit",event=>{
+      if(!selectedExtraAgent)return;
+      const question=homeQuestion(form);
+      if(!question)return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      goChat(question);
+    },true);
+    form.querySelector(".composer-send")?.addEventListener("click",event=>{
+      if(!selectedExtraAgent)return;
+      const question=homeQuestion(form);
+      if(!question)return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      goChat(question);
+    },true);
+  }
+  function syncAgentButtons(){
+    const homeRow=document.querySelector(".composer-agent-row");
+    if(homeRow){
+      addButtons(homeRow,"agent-chip");
+      bindHomeSubmit(homeRow.closest("form"));
+    }
+    const chatRow=document.querySelector(".chat-agent-switch");
+    if(chatRow)addButtons(chatRow,"chat-agent-chip");
+  }
+  const originalFetch=window.fetch;
+  if(originalFetch&&!window.__aimhExtraAgentFetchReady){
+    window.__aimhExtraAgentFetchReady=true;
+    window.fetch=function(input,init){
+      try{
+        const url=typeof input==="string"?input:input&&input.url;
+        if(selectedExtraAgent&&String(url||"").includes("/api/chat/stream")&&init&&typeof init.body==="string"){
+          const body=JSON.parse(init.body);
+          body.agent_id=selectedExtraAgent;
+          init={...init,body:JSON.stringify(body)};
+        }
+      }catch{}
+      return originalFetch.call(this,input,init);
+    };
+  }
+  document.addEventListener("DOMContentLoaded",syncAgentButtons);
+  setInterval(syncAgentButtons,500);
+})();

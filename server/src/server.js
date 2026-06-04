@@ -118,16 +118,22 @@ const config = {
   difyLibraryBaseUrl: (process.env.DIFY_LIBRARY_BASE_URL || "").replace(/\/$/, ""),
   difyNongxiaoxinBaseUrl: (process.env.DIFY_NONGXIAOXIN_BASE_URL || "").replace(/\/$/, ""),
   difyXgBaseUrl: (process.env.DIFY_XG_BASE_URL || process.env.DIFY_NONGXIAOXIN_BASE_URL || "").replace(/\/$/, ""),
+  difyDataBaseUrl: (process.env.DIFY_DATA_BASE_URL || "").replace(/\/$/, ""),
+  difyServiceBaseUrl: (process.env.DIFY_SERVICE_BASE_URL || "").replace(/\/$/, ""),
   difyJiaowuApiKey: process.env.DIFY_JIAOWU_API_KEY || "",
   difyRenshiApiKey: process.env.DIFY_RENSHI_API_KEY || "",
   difyLibraryApiKey: process.env.DIFY_LIBRARY_API_KEY || "",
   difyNongxiaoxinApiKey: process.env.DIFY_NONGXIAOXIN_API_KEY || "",
   difyXgApiKey: process.env.DIFY_XG_API_KEY || process.env.DIFY_NONGXIAOXIN_API_KEY || "",
+  difyDataApiKey: process.env.DIFY_DATA_API_KEY || "",
+  difyServiceApiKey: process.env.DIFY_SERVICE_API_KEY || "",
   difyJiaowuChatUrl: (process.env.DIFY_JIAOWU_CHAT_URL || "").replace(/\/$/, ""),
   difyRenshiChatUrl: (process.env.DIFY_RENSHI_CHAT_URL || "").replace(/\/$/, ""),
   difyLibraryChatUrl: (process.env.DIFY_LIBRARY_CHAT_URL || "").replace(/\/$/, ""),
   difyNongxiaoxinChatUrl: (process.env.DIFY_NONGXIAOXIN_CHAT_URL || "").replace(/\/$/, ""),
   difyXgChatUrl: (process.env.DIFY_XG_CHAT_URL || process.env.DIFY_NONGXIAOXIN_CHAT_URL || "").replace(/\/$/, ""),
+  difyDataChatUrl: (process.env.DIFY_DATA_CHAT_URL || "").replace(/\/$/, ""),
+  difyServiceChatUrl: (process.env.DIFY_SERVICE_CHAT_URL || "").replace(/\/$/, ""),
   difyConnectTimeoutMs: Number(process.env.DIFY_CONNECT_TIMEOUT_MS || Number(process.env.DIFY_CONNECT_TIMEOUT || 15) * 1000),
   difyReadTimeoutMs: Number(process.env.DIFY_READ_TIMEOUT_MS || Number(process.env.DIFY_READ_TIMEOUT || 600) * 1000),
   difyMaxConcurrent: positiveInteger(process.env.DIFY_MAX_CONCURRENT, 10),
@@ -687,6 +693,8 @@ function getIntentLabel(agent) {
     jiaowu: "academic_affairs",
     library: "library_resource",
     xg: "student_affairs",
+    data: "campus_data",
+    service: "campus_service",
     general: "general_chat"
   };
   return mapping[agent?.id] || "campus_super_agent";
@@ -1041,6 +1049,28 @@ function buildAgent(agentId) {
     };
   }
 
+  if (normalizedAgentId === "data") {
+    return {
+      ...registry,
+      id: "data",
+      name: "AI问数",
+      toolName: "call_dify_data",
+      apiKey: config.difyDataApiKey || config.difyApiKey,
+      chatUrl: resolveDifyChatUrl(config.difyDataChatUrl, config.difyDataBaseUrl)
+    };
+  }
+
+  if (normalizedAgentId === "service") {
+    return {
+      ...registry,
+      id: "service",
+      name: "AI办事",
+      toolName: "call_dify_service",
+      apiKey: config.difyServiceApiKey || config.difyApiKey,
+      chatUrl: resolveDifyChatUrl(config.difyServiceChatUrl, config.difyServiceBaseUrl)
+    };
+  }
+
   return {
     ...registry,
     id: "jiaowu",
@@ -1313,6 +1343,8 @@ function agentIdFromToolName(toolName) {
   if (text.includes("jiaowu")) return "jiaowu";
   if (text.includes("library")) return "library";
   if (text.includes("xg") || text.includes("nongxiaoxin")) return "xg";
+  if (text.includes("data")) return "data";
+  if (text.includes("service")) return "service";
   return "";
 }
 
@@ -1325,7 +1357,7 @@ async function getLatestSessionAgent({ sessionId }) {
        LEFT JOIN portal_agent_runs r ON r.run_id = c.run_id
        WHERE c.session_id = ?
          AND c.status = 'success'
-          AND c.tool_name IN ('call_dify_jiaowu', 'call_dify_library', 'call_dify_xg', 'call_dify_nongxiaoxin')
+          AND c.tool_name IN ('call_dify_jiaowu', 'call_dify_library', 'call_dify_xg', 'call_dify_nongxiaoxin', 'call_dify_data', 'call_dify_service')
          AND (r.status IS NULL OR r.status = 'success')
        ORDER BY COALESCE(c.finished_at, c.created_at) DESC, c.id DESC
        LIMIT 1`,
@@ -1577,7 +1609,7 @@ async function streamGeneralAnswer({ res, message, user, agent }) {
           {
             role: "system",
             content:
-              "你是安徽农业大学 AI 门户的默认模型助手，名叫农芯智 AI。当前用户没有选择首页输入框下方的教务智能体、AI馆员或AI辅导员时，问题会由你直接回答。你适合处理问候、闲聊、写作润色、总结、翻译、代码解释、普通知识和开放性咨询。回答要自然、简洁、可靠。请统一使用紧凑的 Markdown 格式：短段落、必要时使用 `- ` 列表、链接使用 Markdown 链接；不要把多个事项用一长串破折号连接。遇到教务、图书馆、学工等校内业务问题时，可以给出通用层面的解释和提问建议，但要提醒用户点击对应智能体按钮获取更准确的业务答复。不要声称系统会自动转交给其他智能体。不要编造具体校内政策、课表、成绩、账号、借阅记录、数据库权限、学生事务办理结果或其他学校内部数据。"
+              "你是安徽农业大学 AI 门户的默认模型助手，名叫农芯智 AI。当前用户没有选择首页输入框下方的教务智能体、AI馆员、AI辅导员、AI问数或AI办事时，问题会由你直接回答。你适合处理问候、闲聊、写作润色、总结、翻译、代码解释、普通知识和开放性咨询。回答要自然、简洁、可靠。请统一使用紧凑的 Markdown 格式：短段落、必要时使用 `- ` 列表、链接使用 Markdown 链接；不要把多个事项用一长串破折号连接。遇到教务、图书馆、学工、数据查询、事项办理等校内业务问题时，可以给出通用层面的解释和提问建议，但要提醒用户点击对应智能体按钮获取更准确的业务答复。不要声称系统会自动转交给其他智能体。不要编造具体校内政策、课表、成绩、账号、借阅记录、数据库权限、办理结果或其他学校内部数据。"
           },
           {
             role: "user",

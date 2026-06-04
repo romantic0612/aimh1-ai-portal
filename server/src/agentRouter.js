@@ -131,6 +131,59 @@ export const AGENT_REGISTRY = {
     ],
     examples: ["奖学金怎么申请", "辅导员在哪里联系", "宿舍门禁几点", "报到要带什么东西？"],
     defaultStrategy: "single_agent"
+  },
+  data: {
+    id: "data",
+    name: "AI问数",
+    type: "business_agent",
+    provider: "dify",
+    description: "处理校内数据查询、统计口径、数据看板、业务指标、趋势分析和问数取数类问题。",
+    keywords: [
+      "问数",
+      "数据",
+      "统计",
+      "指标",
+      "报表",
+      "看板",
+      "分析",
+      "趋势",
+      "人数",
+      "数量",
+      "占比",
+      "汇总",
+      "取数",
+      "查询数据",
+      "data",
+      "analytics"
+    ],
+    examples: ["帮我查一下学生相关统计数据", "这个指标口径是什么", "生成一份数据汇总"],
+    defaultStrategy: "single_agent"
+  },
+  service: {
+    id: "service",
+    name: "AI办事",
+    type: "business_agent",
+    provider: "dify",
+    description: "处理校内事项办理、办事流程、材料清单、办理入口、进度说明和跨部门服务指引。",
+    keywords: [
+      "办事",
+      "办理",
+      "流程",
+      "事项",
+      "服务",
+      "材料",
+      "证明",
+      "申请",
+      "审批",
+      "入口",
+      "进度",
+      "一网通办",
+      "办事大厅",
+      "怎么提交",
+      "service"
+    ],
+    examples: ["这个事项怎么办理", "需要准备哪些材料", "办事入口在哪里"],
+    defaultStrategy: "single_agent"
   }
 };
 

@@ -35,12 +35,12 @@ const cases = [
   {
     message: "怎么开在职证明",
     strategy: "single_agent",
-    agentIds: ["general"]
+    agentIds: ["service"]
   },
   {
     message: "职称评审材料怎么提交",
     strategy: "single_agent",
-    agentIds: ["general"]
+    agentIds: ["service"]
   },
   {
     message: "报到要带什么东西？",
@@ -58,9 +58,24 @@ const cases = [
     agentIds: ["xg"]
   },
   {
+    message: "帮我查一下学院学生人数统计",
+    strategy: "single_agent",
+    agentIds: ["data"]
+  },
+  {
+    message: "这个事项怎么办理，需要哪些材料",
+    strategy: "single_agent",
+    agentIds: ["service"]
+  },
+  {
     message: "我想查论文数据库，还想问毕业学分要求",
     strategy: "multi_agent_parallel",
     agentIds: ["library", "jiaowu"]
+  },
+  {
+    message: "我想查学生人数统计，还想问办事入口在哪里",
+    strategy: "multi_agent_parallel",
+    agentIds: ["data", "service"]
   },
   {
     message: "那什么时候报名",
