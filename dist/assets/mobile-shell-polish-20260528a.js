@@ -2,12 +2,17 @@ function mobileShellPath() {
   return location.pathname.replace(/\/+$/, "") || "/";
 }
 
+function isMobileShellViewport() {
+  return window.matchMedia("(max-width: 768px)").matches;
+}
+
 function syncMobileShellClasses() {
   const path = mobileShellPath();
-  document.documentElement.classList.toggle("mobile-chat-frame", path === "/chat");
+  const mobileChat = path === "/chat" && isMobileShellViewport();
+  document.documentElement.classList.toggle("mobile-chat-frame", mobileChat);
   document.documentElement.classList.toggle("mobile-rank", path === "/mobile/rank");
   document.documentElement.classList.toggle("mobile-home-frame", path === "/mobile");
-  document.documentElement.classList.toggle("mobile-preview", path === "/mobile" || path === "/mobile/rank" || path === "/chat");
+  document.documentElement.classList.toggle("mobile-preview", path === "/mobile" || path === "/mobile/rank" || mobileChat);
 }
 
 function readProfileLabel() {
@@ -50,7 +55,12 @@ function syncInjectedTopbar() {
 }
 
 function ensureMobileChatTopbar() {
-  if (mobileShellPath() !== "/chat") return;
+  if (mobileShellPath() !== "/chat" || !isMobileShellViewport()) {
+    document.querySelector(".mobile-chat-topbar")?.remove();
+    document.querySelector(".mobile-chat-drawer-mask")?.remove();
+    document.body.classList.remove("mobile-chat-history-open");
+    return;
+  }
   if (document.querySelector(".mobile-chat-topbar")) return;
 
   const bar = document.createElement("div");
@@ -94,3 +104,4 @@ document.addEventListener("DOMContentLoaded", syncMobileShell);
 setTimeout(syncMobileShell, 250);
 setTimeout(syncMobileShell, 900);
 addEventListener("popstate", syncMobileShell);
+addEventListener("resize", syncMobileShell);

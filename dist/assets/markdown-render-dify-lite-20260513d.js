@@ -74,6 +74,7 @@
       .replace(/^\s*#{1,6}\s*$/gm, "")
       .replace(/^\s*[*]\s*$/gm, "")
       .replace(/^\s*[-－]\s*$/gm, "")
+      .replace(/(^|\n)([^|\n]{1,40})\|([^|\n]+)\|\|\s*:?-{3,}:?\s*\|\|([^|\n]+)\|?/g, "$1### $2\n\n| $3 |\n| --- |\n| $4 |")
       .replace(/([^\n])(?=#{1,6}[^\s#\n])/g, "$1\n\n")
       .replace(/(^|\n)(#{1,6})([^\s#\n])/g, "$1$2 $3")
       .replace(/(^|\n)(#{1,6})\s*([^#\n>]+?)[-－]\s*([0-9][0-9,]*(?:\.\d+)?\s*[\u4E00-\u9FFFA-Za-z/%]*)\s*>\s*([^\n]+)/g, "$1$2 $3\n\n- $4\n\n> $5")
@@ -87,7 +88,7 @@
       .replace(/([^\n])-(?=(?:正常情况|异常情况|解决方案|注意|若|课程|统计时间|课程范围|成绩认定|补考|旷考|实验课|数据口径|查询结果|统计结果|办理流程|所需材料|办理入口|办理时限))/g, "$1\n- ")
       .replace(/(^|\n)-(?=\S)/g, "$1- ")
       .replace(/(^|\n)([^\s:：#\-*+][^:：\n]{1,16})\n\s*[:：]\s*([^\n]+)/g, "$1- **$2**：$3")
-      .replace(/([^\n])(?=(?:[-*+]\s+|\d+[.)]\s+))/g, "$1\n");
+      .replace(/([^\n|\-*+])(?=(?:[-*+]\s+|\d+[.)]\s+))/g, "$1\n");
 
     const lines = text.split("\n").map((line) => {
       let current = line.trimEnd();
@@ -222,7 +223,7 @@
 
   function renderTable(lines) {
     if (lines.length < 2 || !/\|/.test(lines[0])) return "";
-    if (!/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[1])) return "";
+    if (!/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(lines[1])) return "";
     const split = (line) => line.replace(/^\||\|$/g, "").split("|").map((cell) => cell.trim());
     const headers = split(lines[0]);
     const rows = lines.slice(2).map(split);

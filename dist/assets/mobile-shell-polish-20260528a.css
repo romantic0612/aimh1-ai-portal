@@ -256,11 +256,11 @@ html.mobile-chat-frame .agent-status {
 }
 
 .mobile-chat-topbar {
+  display: none;
   position: fixed;
   top: 0;
   left: 50%;
   z-index: 130;
-  display: grid;
   grid-template-columns: 48px minmax(0, 1fr) 48px;
   align-items: center;
   width: min(430px, 100vw);
@@ -270,6 +270,12 @@ html.mobile-chat-frame .agent-status {
   background: rgba(249, 253, 250, 0.96);
   border-bottom: 1px solid rgba(14, 100, 72, 0.12);
   box-shadow: 0 8px 24px rgba(10, 51, 38, 0.1);
+}
+
+@media (max-width: 768px) {
+  html.mobile-chat-frame .mobile-chat-topbar {
+    display: grid;
+  }
 }
 
 .mobile-chat-history,
