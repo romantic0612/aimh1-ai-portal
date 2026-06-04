@@ -2103,60 +2103,6 @@ html.mobile-home-frame .portal-composer .agent-chip.active {
   color: #fff !important;
 }
 
-/* 20260604a: five campus-agent chips need horizontal breathing room on phones. */
-@media (max-width: 640px) {
-  .composer-agent-row,
-  html.mobile-preview .composer-agent-row,
-  html.mobile-home-frame .composer-agent-row {
-    display: flex !important;
-    grid-template-columns: none !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    scrollbar-width: none;
-  }
-
-  .composer-agent-row::-webkit-scrollbar,
-  html.mobile-preview .composer-agent-row::-webkit-scrollbar,
-  html.mobile-home-frame .composer-agent-row::-webkit-scrollbar {
-    display: none;
-  }
-
-  .portal-composer .agent-chip,
-  html.mobile-preview .portal-composer .agent-chip,
-  html.mobile-home-frame .portal-composer .agent-chip {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    min-width: max-content !important;
-  }
-
-  .chat-agent-switch,
-  html.mobile-preview .chat-agent-switch,
-  html.mobile-chat-frame .chat-agent-switch,
-  html.mobile-chat-frame.mobile-preview .chat-agent-switch {
-    display: flex !important;
-    grid-template-columns: none !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    scrollbar-width: none;
-  }
-
-  .chat-agent-switch::-webkit-scrollbar,
-  html.mobile-preview .chat-agent-switch::-webkit-scrollbar,
-  html.mobile-chat-frame .chat-agent-switch::-webkit-scrollbar,
-  html.mobile-chat-frame.mobile-preview .chat-agent-switch::-webkit-scrollbar {
-    display: none;
-  }
-
-  .chat-agent-chip,
-  html.mobile-preview .chat-agent-chip,
-  html.mobile-chat-frame .chat-agent-chip,
-  html.mobile-chat-frame.mobile-preview .chat-agent-chip {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    min-width: max-content !important;
-  }
-}
-
 .mobile-frame-topbar {
   position: fixed;
   top: 0;
