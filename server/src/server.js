@@ -1524,11 +1524,15 @@ async function streamDifyWorkflowAnswer({ res, message, user, agent, inputs = {}
   if (!agent.chatUrl || !agent.apiKey) {
     const answer = mockAgentAnswer(message, agent);
     if (emitChunks && res) {
-      writeSse(res, {
-        type: "answer_chunk",
-        content: answer,
-        tool_name: agent.toolName
-      });
+      await writeAnswerChunks(
+        res,
+        {
+          type: "answer_chunk",
+          tool_name: agent.toolName
+        },
+        answer,
+        { paced: true }
+      );
     }
     return { answer, conversation_id: "", usage: normalizeUsage(), response_json: {} };
   }
@@ -1664,11 +1668,15 @@ async function streamDifyAnswer({ res, message, conversationId, user, agent, fil
   if (!agent.chatUrl || !agent.apiKey) {
     const answer = mockAgentAnswer(message, agent);
     if (emitChunks && res) {
-      writeSse(res, {
-        type: "answer_chunk",
-        content: answer,
-        tool_name: agent.toolName
-      });
+      await writeAnswerChunks(
+        res,
+        {
+          type: "answer_chunk",
+          tool_name: agent.toolName
+        },
+        answer,
+        { paced: true }
+      );
     }
     return { answer, conversation_id: "", usage: normalizeUsage(), response_json: {} };
   }
@@ -1779,12 +1787,16 @@ async function streamDifyAnswer({ res, message, conversationId, user, agent, fil
         if (typeof content === "string" && content) {
           answer += content;
           if (emitChunks && res) {
-            writeSse(res, {
-              type: "answer_chunk",
+            await writeAnswerChunks(
+              res,
+              {
+                type: "answer_chunk",
+                tool_name: agent.toolName,
+                conversation_id: latestConversationId
+              },
               content,
-              tool_name: agent.toolName,
-              conversation_id: latestConversationId
-            });
+              { paced: content.length >= 80 }
+            );
           }
         }
       }
