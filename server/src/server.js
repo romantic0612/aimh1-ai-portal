@@ -133,6 +133,9 @@ const config = {
   difyNongxiaoxinChatUrl: (process.env.DIFY_NONGXIAOXIN_CHAT_URL || "").replace(/\/$/, ""),
   difyXgChatUrl: (process.env.DIFY_XG_CHAT_URL || process.env.DIFY_NONGXIAOXIN_CHAT_URL || "").replace(/\/$/, ""),
   difyDataChatUrl: (process.env.DIFY_DATA_CHAT_URL || "").replace(/\/$/, ""),
+  difyDataWorkflowUrl: (process.env.DIFY_DATA_WORKFLOW_URL || "").replace(/\/$/, ""),
+  difyDataWorkflowInputKey: process.env.DIFY_DATA_WORKFLOW_INPUT_KEY || "query",
+  difyDataAppId: process.env.DIFY_DATA_APP_ID || "14f802c8-df92-496a-a5b0-1b2bfc6dffa1",
   difyServiceChatUrl: (process.env.DIFY_SERVICE_CHAT_URL || "").replace(/\/$/, ""),
   difyConnectTimeoutMs: Number(process.env.DIFY_CONNECT_TIMEOUT_MS || Number(process.env.DIFY_CONNECT_TIMEOUT || 15) * 1000),
   difyReadTimeoutMs: Number(process.env.DIFY_READ_TIMEOUT_MS || Number(process.env.DIFY_READ_TIMEOUT || 600) * 1000),
@@ -296,6 +299,40 @@ function extractDifyEventContent(event) {
     .join("\n");
 
   return [text, imageMarkdown].filter(Boolean).join(text && imageMarkdown ? "\n" : "");
+}
+
+function stringifyWorkflowOutput(value) {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.map(stringifyWorkflowOutput).filter(Boolean).join("\n");
+  if (typeof value === "object") {
+    const preferred = firstNonEmpty(
+      value.answer,
+      value.text,
+      value.output,
+      value.result,
+      value.response,
+      value.content,
+      value.markdown,
+      value.data
+    );
+    if (preferred) return stringifyWorkflowOutput(preferred);
+    const values = Object.values(value).map(stringifyWorkflowOutput).filter(Boolean);
+    return values.join("\n");
+  }
+  return "";
+}
+
+function extractDifyWorkflowEventContent(event) {
+  const eventName = getDifyEventName(event);
+  if (["text_chunk", "agent_message", "message"].includes(eventName)) {
+    return firstNonEmpty(event?.data?.text, event?.data?.answer, event?.answer, event?.text);
+  }
+  if (eventName === "workflow_finished") {
+    return stringifyWorkflowOutput(event?.data?.outputs || event?.outputs);
+  }
+  return "";
 }
 
 function splitCsv(value) {
@@ -1055,8 +1092,11 @@ function buildAgent(agentId) {
       id: "data",
       name: "AI问数",
       toolName: "call_dify_data",
+      requestMode: "workflow",
+      appId: config.difyDataAppId,
       apiKey: config.difyDataApiKey || config.difyApiKey,
-      chatUrl: resolveDifyChatUrl(config.difyDataChatUrl, config.difyDataBaseUrl)
+      chatUrl: resolveDifyWorkflowUrl(config.difyDataWorkflowUrl || config.difyDataChatUrl, config.difyDataBaseUrl),
+      workflowInputKey: config.difyDataWorkflowInputKey
     };
   }
 
@@ -1435,7 +1475,137 @@ function resolveDifyChatUrl(chatUrl, baseUrl) {
   return `${resolvedBaseUrl}/v1/chat-messages`;
 }
 
+function resolveDifyWorkflowUrl(workflowUrl, baseUrl) {
+  const directUrl = (workflowUrl || "").replace(/\/$/, "");
+  if (directUrl) return directUrl;
+
+  const resolvedBaseUrl = (baseUrl || config.difyBaseUrl || "").replace(/\/$/, "");
+  if (!resolvedBaseUrl) return "";
+  return `${resolvedBaseUrl}/v1/workflows/run`;
+}
+
+async function streamDifyWorkflowAnswer({ res, message, user, agent, inputs = {}, emitChunks = true }) {
+  if (!agent.chatUrl || !agent.apiKey) {
+    const answer = mockAgentAnswer(message, agent);
+    if (emitChunks && res) {
+      writeSse(res, {
+        type: "answer_chunk",
+        content: answer,
+        tool_name: agent.toolName
+      });
+    }
+    return { answer, conversation_id: "", usage: normalizeUsage(), response_json: {} };
+  }
+
+  return difyLimiter.run(async () => {
+    if (res?.locals?.sse?.closed || res?.destroyed || res?.writableEnded) {
+      throw new Error("client_closed_before_dify_workflow_request");
+    }
+
+    const controller = new AbortController();
+    const readTimer = setTimeout(() => controller.abort(), config.difyReadTimeoutMs);
+    let connectTimer = null;
+
+    const clearConnectTimer = () => {
+      if (connectTimer) {
+        clearTimeout(connectTimer);
+        connectTimer = null;
+      }
+    };
+
+    try {
+      const workflowInputs = inputs && typeof inputs === "object" && !Array.isArray(inputs) ? { ...inputs } : {};
+      const inputKey = String(agent.workflowInputKey || "query").trim();
+      if (inputKey && workflowInputs[inputKey] == null) {
+        workflowInputs[inputKey] = normalizeMessage(message);
+      }
+
+      clearConnectTimer();
+      connectTimer = setTimeout(() => controller.abort(), config.difyConnectTimeoutMs);
+      const response = await fetch(agent.chatUrl, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${agent.apiKey}`,
+          "Content-Type": "application/json",
+          Accept: "text/event-stream"
+        },
+        body: JSON.stringify({
+          inputs: workflowInputs,
+          response_mode: "streaming",
+          user: String(user.user_id || "guest")
+        })
+      });
+      clearConnectTimer();
+
+      if (!response.ok || !response.body) {
+        const detail = await response.text();
+        throw new Error(`Dify workflow request failed: ${response.status} ${detail}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let answer = "";
+      let latestUsage = normalizeUsage();
+      let latestEvent = null;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() || "";
+
+        for (const chunk of chunks) {
+          const dataLine = chunk
+            .split("\n")
+            .map((line) => line.trim())
+            .find((line) => line.startsWith("data:"));
+          if (!dataLine) continue;
+
+          const raw = dataLine.slice(5).trim();
+          if (!raw || raw === "[DONE]") continue;
+
+          const event = parseMaybeJson(raw);
+          if (!event || typeof event !== "object") continue;
+
+          latestEvent = event;
+          latestUsage = mergeUsage(latestUsage, usageFromEvent(event));
+          const content = extractDifyWorkflowEventContent(event);
+          if (typeof content === "string" && content) {
+            answer += content;
+            if (emitChunks && res) {
+              writeSse(res, {
+                type: "answer_chunk",
+                content,
+                tool_name: agent.toolName,
+                conversation_id: ""
+              });
+            }
+          }
+        }
+      }
+
+      return {
+        answer: answer.trim() || "智能体已完成处理，但没有返回文本内容。",
+        conversation_id: "",
+        usage: latestUsage,
+        response_json: latestEvent && typeof latestEvent === "object" ? latestEvent : {}
+      };
+    } finally {
+      clearConnectTimer();
+      clearTimeout(readTimer);
+    }
+  });
+}
+
 async function streamDifyAnswer({ res, message, conversationId, user, agent, files = [], inputs = {}, emitChunks = true }) {
+  if (agent.requestMode === "workflow") {
+    return streamDifyWorkflowAnswer({ res, message, user, agent, inputs, emitChunks });
+  }
+
   if (!agent.chatUrl || !agent.apiKey) {
     const answer = mockAgentAnswer(message, agent);
     if (emitChunks && res) {
