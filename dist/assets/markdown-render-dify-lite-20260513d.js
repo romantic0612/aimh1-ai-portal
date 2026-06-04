@@ -77,7 +77,7 @@
       .replace(/([^\n])(?=#{1,6}[^\s#\n])/g, "$1\n\n")
       .replace(/(^|\n)(#{1,6})([^\s#\n])/g, "$1$2 $3")
       .replace(/([^\n])(?=(?:具体要求|核心计算公式|注意事项|数据口径|查询结果|统计结果|办理流程|所需材料|办理入口|办理时限)\s*\d*[.．、]?\S)/g, "$1\n\n")
-      .replace(/([^\n\s])(?=\d+[.．、]\s*\S)/g, "$1\n")
+      .replace(/([^\n\sA-Za-z0-9/:._?&=%-])(?=\d+[.．、]\s*\S)/g, "$1\n")
       .replace(/(#{1,6}\s*关于[^\n#。；，,]*?情况说明)(?=\S)/g, "$1\n\n")
       .replace(/(#{1,6}\s*(?:出现原因|系统默认机制|解决方案|正常情况|异常情况|处理方式|解决办法|注意事项|成绩统计范围|成绩计算规则|数据口径|查询结果|统计结果|办理流程|所需材料|办理入口|办理时限|更多详细信息))(?=\S)/g, "$1\n\n")
       .replace(/([^\n])-(?=(?:正常情况|异常情况|解决方案|注意|若|课程|统计时间|课程范围|成绩认定|补考|旷考|实验课|数据口径|查询结果|统计结果|办理流程|所需材料|办理入口|办理时限))/g, "$1\n- ")
@@ -107,7 +107,7 @@
       current = current.replace(/^(\d+)[.．、]\s*(.+)$/u, "$1. $2");
       current = current.replace(/^(辅修课程|实验课成绩|计算次数|课程范围|统计时间|成绩认定|补考和重修成绩|旷考处理)\s*[-－]\s*$/u, "#### $1");
       current = current.replace(/^\*(\S.*)$/u, "$1");
-      current = current.replace(/^([^\d\s:：#\-*+][^:：\n]{1,16})\s*[:：]\s*(.+)$/u, "- **$1**：$2");
+      current = current.replace(/^([^\d\s:：#\-*+][^:：\n]{1,16})\s*[:：]\s*(?!https?:\/\/)(.+)$/u, "- **$1**：$2");
       current = current.replace(/^(-\s+.+?)[-－]\s*$/u, "$1");
       current = current.replace(/(\S)\*$/u, "$1");
       return current;
@@ -148,7 +148,7 @@
       const url = safeUrl(href);
       return url ? stash.put(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${inlineMarkdown(label)}</a>`) : escapeHtml(match);
     });
-    text = text.replace(/(^|[\s(（])((https?:\/\/[^\s<>"']+))/gi, (match, prefix, rawUrl) => {
+    text = text.replace(/(^|[\s(\uFF08:\uFF1A])((https?:\/\/[^\s<>"']+))/gi, (match, prefix, rawUrl) => {
       let urlText = rawUrl;
       while (/[)，。；！？、,.!?;:]+$/.test(urlText))
         urlText = urlText.slice(0, -1);
@@ -156,9 +156,10 @@
       const url = safeUrl(urlText);
       if (!url) return match;
       const imageLike = /\.(png|jpe?g|gif|bmp|webp|svg)(\?.*)?$/i.test(url) || /\/file-preview(?:[?#]|$)/i.test(url);
+      const linkLabel = urlText.length > 48 ? "打开链接" : urlText;
       const html = imageLike
         ? `<img src="${escapeHtml(url)}" alt="图片" class="chat-image" loading="lazy" />`
-        : `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(urlText)}</a>`;
+        : `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(linkLabel)}</a>`;
       return `${prefix}${stash.put(html)}${escapeHtml(suffix)}`;
     });
     text = text.replace(/\*\*([^*\n]+)\*(?!\*)/g, "<strong>$1</strong>");
