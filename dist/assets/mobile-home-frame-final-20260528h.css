@@ -442,7 +442,7 @@ html.mobile-preview.mobile-home-frame:not(.mobile-rank):has(.home-main) .hero .p
   display: grid;
   gap: 12px;
   width: min(430px, 100vw);
-  min-height: 126px;
+  min-height: 158px;
   padding: 14px 14px 10px;
   transform: translateX(-50%);
   border: 0;
@@ -510,15 +510,16 @@ html.mobile-preview.mobile-home-frame:not(.mobile-rank):has(.home-main) .hero .p
 
 .mobile-frame-agent-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .mobile-frame-agent-row button {
-  flex: 0 0 auto;
+  flex: 1 0 calc(33.333% - 8px);
   height: 32px;
-  min-width: 76px;
-  padding: 0 12px;
+  min-width: 0;
+  padding: 0 8px;
   border: 1px solid rgba(14, 126, 87, 0.38);
   border-radius: 999px;
   background: #fff;

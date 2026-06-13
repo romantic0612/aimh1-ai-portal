@@ -1,6 +1,6 @@
 html.mobile-home-frame .mobile-frame-topbar.mobile-portal-topbar,
 html.mobile-rank .mobile-frame-topbar.mobile-portal-topbar {
-  grid-template-columns: minmax(112px, 0.86fr) minmax(150px, 1.2fr) minmax(70px, 0.56fr) !important;
+  grid-template-columns: minmax(112px, 0.8fr) minmax(170px, 1.2fr) !important;
   height: 54px !important;
   padding: 6px 8px !important;
   gap: 6px !important;
@@ -36,8 +36,9 @@ html.mobile-rank .mobile-frame-topbar.mobile-portal-topbar {
 .mobile-frame-brand span,
 .mobile-frame-profile {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 3px;
 }
 
 .mobile-frame-brand b {
@@ -53,7 +54,7 @@ html.mobile-rank .mobile-frame-topbar.mobile-portal-topbar {
   color: rgba(10, 80, 57, 0.58);
   font-size: 9px;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1;
 }
 
 html.mobile-home-frame .mobile-frame-tabs,

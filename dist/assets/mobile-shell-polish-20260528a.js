@@ -15,13 +15,6 @@ function syncMobileShellClasses() {
   document.documentElement.classList.toggle("mobile-preview", path === "/mobile" || path === "/mobile/rank" || mobileChat);
 }
 
-function readProfileLabel() {
-  const profile = document.querySelector(".topbar .profile-button");
-  const name = profile?.querySelector("strong")?.textContent?.trim() || "个人";
-  const role = profile?.querySelector("small")?.textContent?.trim() || "";
-  return { name, role };
-}
-
 function syncInjectedTopbar() {
   const path = mobileShellPath();
   const topbar = document.querySelector(".mobile-frame-topbar");
@@ -41,17 +34,8 @@ function syncInjectedTopbar() {
     topbar.querySelector(".mobile-frame-menu")?.replaceWith(brand);
   }
 
-  if (!topbar.querySelector(".mobile-frame-profile")) {
-    const profile = document.createElement("button");
-    profile.className = "mobile-frame-profile";
-    profile.type = "button";
-    topbar.querySelector(".mobile-frame-new")?.replaceWith(profile);
-  }
-  const { name, role } = readProfileLabel();
-  const profile = topbar.querySelector(".mobile-frame-profile");
-  if (profile) {
-    profile.innerHTML = `<strong>${name}</strong>${role ? `<small>${role}</small>` : ""}`;
-  }
+  topbar.querySelector(".mobile-frame-profile")?.remove();
+  topbar.querySelector(".mobile-frame-new")?.remove();
 }
 
 function ensureMobileChatTopbar() {
