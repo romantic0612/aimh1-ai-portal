@@ -380,6 +380,26 @@
             <input v-model="draft" :disabled="loading" type="text" :placeholder="isHistoryView ? '历史记录仅供查看，请先新建对话' : '继续输入问题，回车发送'" />
             <button type="submit" :disabled="loading || !draft.trim()">{{ loading ? "处理中" : "发送" }}</button>
           </form>
+
+          <form class="mobile-chat-frame-composer" @submit.prevent="send">
+            <div class="mobile-frame-input-row">
+              <span class="mobile-frame-logo"><img src="/logo.png" alt="" /></span>
+              <input v-model="draft" :disabled="loading" type="search" enterkeyhint="send" :placeholder="isHistoryView ? '历史记录仅供查看，请先新建对话' : '给农芯智 AI 发送消息'" />
+              <button class="mobile-frame-send" type="submit" :disabled="loading || !draft.trim()">{{ loading ? "处理中" : "发送" }}</button>
+            </div>
+            <div v-if="!isHistoryView" class="mobile-frame-agent-row" aria-label="选择校内智能体">
+              <button
+                v-for="agent in chatAgentOptions"
+                :key="agent.id"
+                type="button"
+                :class="{ active: selectedAgentId === agent.id }"
+                :aria-pressed="selectedAgentId === agent.id"
+                :data-agent="agent.id"
+                @click="toggleChatAgent(agent.id)"
+              >{{ agent.name }}</button>
+            </div>
+            <button class="mobile-frame-submit" type="submit" aria-label="send"></button>
+          </form>
         </section>
 
         <aside class="chat-tools" aria-label="工具和常用链接">
