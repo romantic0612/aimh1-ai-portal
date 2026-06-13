@@ -611,9 +611,12 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch {
   right: auto !important;
   bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
   display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
   gap: 8px !important;
   width: calc(min(430px, 100vw) - 28px) !important;
   max-width: calc(100vw - 28px) !important;
+  height: auto !important;
   min-height: 34px !important;
   padding: 0 !important;
   overflow-x: auto !important;
@@ -626,12 +629,29 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch {
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   box-sizing: border-box !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch::before,
+html.mobile-chat-frame.mobile-preview .chat-agent-switch::before {
+  content: none !important;
+  display: none !important;
 }
 
 html.mobile-chat-frame .chat-agent-switch::-webkit-scrollbar,
 html.mobile-chat-frame.mobile-preview .chat-agent-switch::-webkit-scrollbar {
   display: none !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch::after,
+html.mobile-chat-frame.mobile-preview .chat-agent-switch::after {
+  content: "" !important;
+  display: block !important;
+  flex: 0 0 14px !important;
+  width: 14px !important;
+  pointer-events: none !important;
 }
 
 html.mobile-chat-frame .chat-agent-switch button,
@@ -642,9 +662,26 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch button {
   height: 32px !important;
   min-height: 32px !important;
   padding: 0 12px !important;
+  border: 1px solid rgba(14, 126, 87, 0.38) !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: #184a38 !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
   overflow: visible !important;
   white-space: nowrap !important;
   scroll-snap-align: start !important;
+}
+
+html.mobile-chat-frame .chat-agent-switch button.active,
+html.mobile-chat-frame .chat-agent-switch button[aria-pressed="true"],
+html.mobile-chat-frame.mobile-preview .chat-agent-switch button.active,
+html.mobile-chat-frame.mobile-preview .chat-agent-switch button[aria-pressed="true"] {
+  border-color: #0c8f61 !important;
+  background: #0c8f61 !important;
+  color: #fff !important;
 }
 
 html.mobile-chat-frame.mobile-keyboard-open .chat-input,
