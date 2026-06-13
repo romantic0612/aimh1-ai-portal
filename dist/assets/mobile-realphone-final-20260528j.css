@@ -645,6 +645,7 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
+  justify-content: flex-start !important;
   gap: 8px !important;
   width: calc(min(430px, 100vw) - 28px) !important;
   max-width: calc(100vw - 28px) !important;
@@ -655,6 +656,11 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch {
   overflow-x: auto !important;
   overflow-y: hidden !important;
   transform: translateX(-50%) !important;
+  touch-action: pan-x !important;
+  overscroll-behavior-x: contain !important;
+  scroll-snap-type: x proximity !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
@@ -692,6 +698,7 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
+  justify-content: flex-start !important;
   gap: 8px !important;
   width: calc(min(430px, 100vw) - 28px) !important;
   max-width: calc(100vw - 28px) !important;
@@ -701,6 +708,8 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch {
   padding: 0 !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
+  touch-action: pan-x !important;
+  overscroll-behavior-x: contain !important;
   scroll-snap-type: x proximity !important;
   -webkit-overflow-scrolling: touch !important;
   scrollbar-width: none !important;
@@ -738,10 +747,10 @@ html.mobile-chat-frame .chat-agent-switch button,
 html.mobile-chat-frame.mobile-preview .chat-agent-switch button {
   flex: 0 0 auto !important;
   width: auto !important;
-  min-width: 76px !important;
+  min-width: 108px !important;
   height: 32px !important;
   min-height: 32px !important;
-  padding: 0 12px !important;
+  padding: 0 14px !important;
   border: 1px solid rgba(14, 126, 87, 0.38) !important;
   border-radius: 999px !important;
   background: #fff !important;
@@ -753,6 +762,7 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch button {
   overflow: visible !important;
   white-space: nowrap !important;
   scroll-snap-align: start !important;
+  user-select: none !important;
 }
 
 html.mobile-chat-frame .chat-agent-switch button.active,
