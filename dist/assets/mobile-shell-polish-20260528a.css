@@ -35,10 +35,13 @@ html.mobile-rank .mobile-frame-topbar.mobile-portal-topbar {
 
 .mobile-frame-brand span,
 .mobile-frame-profile {
-  display: flex;
-  align-items: baseline;
-  justify-content: flex-start;
-  gap: 3px;
+  display: block;
+}
+
+.mobile-frame-brand span {
+  position: relative;
+  width: max-content;
+  max-width: 76px;
 }
 
 .mobile-frame-brand b {
@@ -51,10 +54,14 @@ html.mobile-rank .mobile-frame-topbar.mobile-portal-topbar {
 }
 
 .mobile-frame-brand small {
+  position: absolute;
+  left: calc(100% + 2px);
+  top: 1px;
   color: rgba(10, 80, 57, 0.58);
   font-size: 9px;
   font-weight: 800;
   line-height: 1;
+  white-space: nowrap;
 }
 
 html.mobile-home-frame .mobile-frame-tabs,

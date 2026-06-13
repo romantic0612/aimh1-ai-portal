@@ -442,7 +442,7 @@ html.mobile-preview.mobile-home-frame:not(.mobile-rank):has(.home-main) .hero .p
   display: grid;
   gap: 12px;
   width: min(430px, 100vw);
-  min-height: 158px;
+  min-height: 126px;
   padding: 14px 14px 10px;
   transform: translateX(-50%);
   border: 0;
@@ -509,17 +509,33 @@ html.mobile-preview.mobile-home-frame:not(.mobile-rank):has(.home-main) .hero .p
 }
 
 .mobile-frame-agent-row {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mobile-frame-agent-row::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-frame-agent-row::after {
+  content: "";
+  flex: 0 0 14px;
+  width: 14px;
+  pointer-events: none;
 }
 
 .mobile-frame-agent-row button {
-  flex: 1 0 calc(33.333% - 8px);
+  flex: 0 0 auto;
   height: 32px;
-  min-width: 0;
-  padding: 0 8px;
+  min-width: 76px;
+  padding: 0 12px;
+  scroll-snap-align: start;
   border: 1px solid rgba(14, 126, 87, 0.38);
   border-radius: 999px;
   background: #fff;
