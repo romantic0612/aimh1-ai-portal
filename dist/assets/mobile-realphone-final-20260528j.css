@@ -597,12 +597,12 @@ html.mobile-chat-frame.mobile-preview.mobile-keyboard-open .chat-agent-switch {
 /* 20260613: keep mobile chat agents horizontally scrollable for future growth. */
 html.mobile-chat-frame .chat-window,
 html.mobile-chat-frame.mobile-preview .chat-window {
-  padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: calc(190px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 html.mobile-chat-frame .chat-input,
 html.mobile-chat-frame.mobile-preview .chat-input {
-  bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 html.mobile-chat-frame .chat-agent-switch,
@@ -616,8 +616,9 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch {
   gap: 8px !important;
   width: calc(min(430px, 100vw) - 28px) !important;
   max-width: calc(100vw - 28px) !important;
-  height: auto !important;
+  height: 34px !important;
   min-height: 34px !important;
+  max-height: 34px !important;
   padding: 0 !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
@@ -686,7 +687,7 @@ html.mobile-chat-frame.mobile-preview .chat-agent-switch button[aria-pressed="tr
 
 html.mobile-chat-frame.mobile-keyboard-open .chat-input,
 html.mobile-chat-frame.mobile-preview.mobile-keyboard-open .chat-input {
-  bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 html.mobile-chat-frame.mobile-keyboard-open .chat-agent-switch,
