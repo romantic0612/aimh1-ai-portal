@@ -453,9 +453,9 @@ html.mobile-preview.mobile-home-frame:not(.mobile-rank):has(.home-main) .hero .p
 
 .mobile-frame-input-row {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-columns: 42px minmax(0, 1fr) 58px;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .mobile-frame-logo {
@@ -489,6 +489,23 @@ html.mobile-preview.mobile-home-frame:not(.mobile-rank):has(.home-main) .hero .p
 
 .mobile-frame-input-row input::placeholder {
   color: rgba(58, 72, 64, 0.58);
+}
+
+.mobile-frame-send {
+  width: 54px;
+  min-width: 54px;
+  height: 44px;
+  border: 0;
+  border-radius: 22px;
+  background: #0d8f62;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 950;
+  box-shadow: 0 8px 18px rgba(13, 143, 98, 0.2);
+}
+
+.mobile-frame-send:active {
+  transform: translateY(1px);
 }
 
 .mobile-frame-agent-row {

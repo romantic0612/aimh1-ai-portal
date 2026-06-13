@@ -37,7 +37,7 @@ function syncInjectedTopbar() {
     const brand = document.createElement("a");
     brand.className = "mobile-frame-brand";
     brand.href = "/mobile";
-    brand.innerHTML = '<img src="/logo.png" alt=""><span><b>农芯智</b><small>AI Portal</small></span>';
+    brand.innerHTML = '<img src="/logo.png" alt=""><span><b>农芯智</b><small>v1.0</small></span>';
     topbar.querySelector(".mobile-frame-menu")?.replaceWith(brand);
   }
 
