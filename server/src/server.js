@@ -137,6 +137,9 @@ const config = {
   difyDataWorkflowInputKey: process.env.DIFY_DATA_WORKFLOW_INPUT_KEY || "query",
   difyDataAppId: process.env.DIFY_DATA_APP_ID || "14f802c8-df92-496a-a5b0-1b2bfc6dffa1",
   difyServiceChatUrl: (process.env.DIFY_SERVICE_CHAT_URL || "").replace(/\/$/, ""),
+  serviceNavigatorBaseUrl: (process.env.SERVICE_NAVIGATOR_BASE_URL || "").replace(/\/$/, ""),
+  serviceNavigatorTimeoutMs: Number(process.env.SERVICE_NAVIGATOR_TIMEOUT_MS || 30000),
+  serviceNavigatorEnabled: (process.env.SERVICE_NAVIGATOR_ENABLED || "true").toLowerCase() !== "false",
   difyConnectTimeoutMs: Number(process.env.DIFY_CONNECT_TIMEOUT_MS || Number(process.env.DIFY_CONNECT_TIMEOUT || 15) * 1000),
   difyReadTimeoutMs: Number(process.env.DIFY_READ_TIMEOUT_MS || Number(process.env.DIFY_READ_TIMEOUT || 600) * 1000),
   difyMaxConcurrent: positiveInteger(process.env.DIFY_MAX_CONCURRENT, 10),
@@ -1814,6 +1817,87 @@ async function streamDifyAnswer({ res, message, conversationId, user, agent, fil
     }
   });
 }
+
+function normalizeServiceNavigatorCards(cards) {
+  return (Array.isArray(cards) ? cards : []).map((card) => {
+    const item = card && typeof card === "object" ? card : {};
+    return {
+      id: String(item.id || item.serviceId || item.itemId || ""),
+      title: String(item.title || item.name || "办事事项"),
+      category: String(item.category || item.categoryName || ""),
+      description: String(item.description || item.summary || item.content || ""),
+      handlerCount: Number(item.handlerCount ?? item.handler_count ?? 0) || 0,
+      targetRoles: Array.isArray(item.targetRoles) ? item.targetRoles : Array.isArray(item.target_roles) ? item.target_roles : [],
+      entryUrl: String(item.entryUrl || item.entry_url || item.url || item.targetUrl || ""),
+      department: String(item.department || item.departmentName || ""),
+      contactPerson: String(item.contactPerson || item.contact_person || ""),
+      contactPhone: String(item.contactPhone || item.contact_phone || ""),
+      serviceTime: String(item.serviceTime || item.service_time || ""),
+      basis: String(item.basis || ""),
+      materials: Array.isArray(item.materials) ? item.materials : [],
+      processSteps: Array.isArray(item.processSteps) ? item.processSteps : Array.isArray(item.process_steps) ? item.process_steps : [],
+      notice: String(item.notice || item.notes || ""),
+      assets: Array.isArray(item.assets) ? item.assets : [],
+      lastVerifiedAt: String(item.lastVerifiedAt || item.last_verified_at || "")
+    };
+  });
+}
+
+function normalizeServiceNavigatorResult(payload) {
+  const data = payload && typeof payload === "object" ? payload : {};
+  const answer = firstNonEmpty(data.message, data.answer, data.text, data.content);
+  return {
+    answer: answer || "AI办事已完成检索，但没有返回文本说明。",
+    action: String(data.action || data.type || "recommend_service"),
+    service_cards: normalizeServiceNavigatorCards(data.serviceCards || data.service_cards || data.cards),
+    guide_suggestions: Array.isArray(data.guideSuggestions)
+      ? data.guideSuggestions
+      : Array.isArray(data.guide_suggestions)
+        ? data.guide_suggestions
+        : [],
+    profile_update_candidates: Array.isArray(data.profileUpdateCandidates)
+      ? data.profileUpdateCandidates
+      : Array.isArray(data.profile_update_candidates)
+        ? data.profile_update_candidates
+        : [],
+    raw: data
+  };
+}
+
+async function callServiceNavigator({ message, user, sessionId, runId }) {
+  if (!config.serviceNavigatorEnabled || !config.serviceNavigatorBaseUrl) {
+    return null;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), config.serviceNavigatorTimeoutMs);
+  try {
+    const response = await fetch(`${config.serviceNavigatorBaseUrl}/assistant/message`, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify({
+        userId: String(user.user_id || "guest"),
+        message,
+        portalSessionId: sessionId,
+        portalRunId: runId
+      })
+    });
+
+    const text = await response.text();
+    const payload = text ? parseMaybeJson(text) : {};
+    if (!response.ok) {
+      throw new Error(`Service navigator request failed: ${response.status} ${text}`);
+    }
+    return normalizeServiceNavigatorResult(payload || {});
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function streamGeneralAnswer({ res, message, user, agent }) {
   if (!agent.chatUrl || !agent.apiKey) {
     const answer = [
@@ -3146,6 +3230,119 @@ app.post("/api/chat/stream", requireLogin, async (req, res) => {
       tool_name: agent.toolName,
       data: { query: message, call_id: toolCallId }
     });
+
+    if (agent.id === "service" && config.serviceNavigatorEnabled && config.serviceNavigatorBaseUrl) {
+      const serviceAgent = {
+        ...agent,
+        toolId: "service-navigator-assistant",
+        toolName: "call_service_navigator",
+        provider: "ai-service-navigator",
+        requestMode: "http_json",
+        chatUrl: `${config.serviceNavigatorBaseUrl}/assistant/message`
+      };
+      await upsertAgentTool(serviceAgent);
+
+      const result = await callServiceNavigator({ message, user, sessionId, runId });
+      const latencyMs = Date.now() - startedAt;
+      const toolLatencyMs = Date.now() - toolStartedAt;
+      const hasAnswer = Boolean(String(result?.answer || "").trim());
+
+      await recordAgentToolCall({
+        callId: toolCallId,
+        runId,
+        sessionId,
+        agent: serviceAgent,
+        request: { query: message, portal_session_id: sessionId, user_id: String(user.user_id || "guest") },
+        responseText: result?.answer || "",
+        responseConversationId: "",
+        responseJson: {
+          action: result?.action || "",
+          service_cards: result?.service_cards || [],
+          guide_suggestions: result?.guide_suggestions || [],
+          profile_update_candidates: result?.profile_update_candidates || []
+        },
+        usage: normalizeUsage(),
+        status: hasAnswer ? "success" : "error",
+        errorMessage: hasAnswer ? "" : "empty_answer",
+        latencyMs: toolLatencyMs,
+        startedAt: toolStartedAt,
+        finishedAt: Date.now()
+      });
+      await recordAgentStep({
+        runId,
+        sessionId,
+        index: 4,
+        type: "tool_result",
+        name: `${serviceAgent.toolName}_result`,
+        title: "AI办事返回",
+        content: hasAnswer ? "Service navigator returned a non-empty answer." : "Service navigator returned an empty answer.",
+        output: {
+          answer_length: String(result?.answer || "").length,
+          card_count: (result?.service_cards || []).length
+        },
+        status: hasAnswer ? "success" : "error",
+        errorMessage: hasAnswer ? "" : "empty_answer",
+        latencyMs: toolLatencyMs,
+        startedAt: toolStartedAt,
+        finishedAt: Date.now()
+      });
+
+      if (hasAnswer) {
+        writeSse(res, {
+          type: "answer_chunk",
+          content: result.answer,
+          tool_name: serviceAgent.toolName
+        });
+      }
+
+      writeSse(res, {
+        type: "tool_result",
+        content: "AI办事已返回可办理事项。",
+        tool_name: serviceAgent.toolName,
+        data: {
+          action: result?.action || "",
+          service_cards: result?.service_cards || [],
+          guide_suggestions: result?.guide_suggestions || [],
+          profile_update_candidates: result?.profile_update_candidates || []
+        }
+      });
+
+      const logResult = await finishAgentRun({
+        sessionId,
+        runId,
+        user,
+        agent: serviceAgent,
+        answer: result?.answer || "",
+        status: hasAnswer ? "success" : "error",
+        errorMessage: hasAnswer ? "" : "empty_answer",
+        latencyMs,
+        toolCallCount: 1,
+        usage: normalizeUsage()
+      });
+
+      writeSse(res, {
+        type: "final",
+        content: "Service navigator response completed.",
+        answer: result?.answer || "",
+        conversation_id: "",
+        portal_session_id: sessionId,
+        run_id: runId,
+        dify_conversation_id: "",
+        counted: Boolean(logResult.counted),
+        route: publicRoute(route),
+        tool_events: [
+          {
+            call_id: toolCallId,
+            agent: serviceAgent.id,
+            tool_name: serviceAgent.toolName,
+            status: hasAnswer ? "success" : "error",
+            latency_ms: toolLatencyMs
+          }
+        ]
+      });
+      safeEnd();
+      return;
+    }
 
     const difyConversationId = await getLatestDifyConversationId({ sessionId, agent });
     const result = await streamDifyAnswer({

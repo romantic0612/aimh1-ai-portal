@@ -32,7 +32,7 @@ const activeTitle = computed(() => {
 });
 
 function addMessage(role, text = "", type = "") {
-  const item = { id: `${Date.now()}-${Math.random()}`, role, text, type };
+  const item = { id: `${Date.now()}-${Math.random()}`, role, text, type, serviceCards: [] };
   messages.value.push(item);
   scrollBottom();
   return item;
@@ -48,6 +48,44 @@ function scrollBottom() {
   nextTick(() => {
     if (chatWindow.value) chatWindow.value.scrollTop = chatWindow.value.scrollHeight;
   });
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function normalizeServiceCards(value) {
+  return (Array.isArray(value) ? value : []).filter((card) => card && typeof card === "object");
+}
+
+function renderServiceCards(cards = []) {
+  const items = normalizeServiceCards(cards);
+  if (!items.length) return "";
+  return items.map((card) => {
+    const materials = Array.isArray(card.materials) ? card.materials.filter(Boolean) : [];
+    const steps = Array.isArray(card.processSteps) ? card.processSteps.filter(Boolean) : [];
+    const entryUrl = card.entryUrl || card.entry_url || card.url || "";
+    return `
+      <section class="service-card">
+        <div class="service-card-head">
+          <span>${escapeHtml(card.category || "办事事项")}</span>
+          <strong>${escapeHtml(card.title || card.name || "未命名事项")}</strong>
+        </div>
+        ${card.description ? `<p>${escapeHtml(card.description)}</p>` : ""}
+        ${card.department ? `<small>办理部门：${escapeHtml(card.department)}</small>` : ""}
+        ${materials.length ? `<div><b>所需材料</b><ul>${materials.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+        ${steps.length ? `<div><b>办理流程</b><ol>${steps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol></div>` : ""}
+        ${card.notice ? `<em>${escapeHtml(card.notice)}</em>` : ""}
+        ${entryUrl ? `<a href="${escapeHtml(entryUrl)}" target="_blank" rel="noopener noreferrer">立即办理</a>` : ""}
+      </section>
+    `;
+  }).join("");
 }
 
 async function loadHistory() {
@@ -115,6 +153,10 @@ async function send(text = draft.value) {
         if (event.type === "answer_chunk") {
           assistant.type = "answer";
           appendMessage(assistant, event.content || "");
+        } else if (event.type === "tool_result" && event.tool_name === "call_service_navigator") {
+          assistant.type = "answer";
+          assistant.serviceCards = normalizeServiceCards(event.data?.service_cards || event.data?.serviceCards);
+          scrollBottom();
         } else if (event.answer && !assistant.text) {
           assistant.type = "answer";
           assistant.text = event.answer;
@@ -183,7 +225,10 @@ watch(
         </article>
         <article v-for="message in messages" :key="message.id" :class="['message', message.role, message.type]">
           <div v-if="message.role === 'user'" class="user-bubble">{{ message.text }}</div>
-          <MarkdownView v-else :text="message.text || (loading ? '正在处理...' : '')" />
+          <template v-else>
+            <MarkdownView :text="message.text || (loading ? '正在处理...' : '')" />
+            <div v-if="message.serviceCards?.length" class="service-card-list" v-html="renderServiceCards(message.serviceCards)"></div>
+          </template>
         </article>
       </div>
 
