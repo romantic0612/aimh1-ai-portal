@@ -44,7 +44,7 @@ This is a packaged frontend plus Node/Express backend project.
 - Backend scripts are in `server/package.json`: `npm run dev` and `npm start`.
 - Production can run with `ecosystem.config.cjs` and PM2 cluster mode.
 - GitHub repository: `https://github.com/romantic0612/aimh1-ai-portal.git`.
-- Production domain: `https://sjaigc.ahau.edu.cn/`.
+- Production domain: `https://ai.ahau.edu.cn/`.
 
 ## Production Setup
 
@@ -54,7 +54,8 @@ Production uses Docker plus PM2 cluster.
 - PM2 mode: `exec_mode: "cluster"`
 - PM2 instances: `10`
 - Memory restart limit: `1G`
-- Production port: `7998`
+- Production source port: `3000`
+- Public HTTPS port: `443`
 
 Deploy:
 
@@ -62,7 +63,7 @@ Deploy:
 cd ~/aimh1-ai-portal
 git pull origin main
 docker compose up -d --build
-curl http://127.0.0.1:7998/api/health
+curl http://127.0.0.1:3000/api/health
 ```
 
 Expected health response:
@@ -131,6 +132,28 @@ Rules:
 - Do not commit `server/.env`.
 - Do not print or summarize secret values.
 - Do not modify production database schema casually.
+
+## OAuth/CAS Configuration
+
+Anhui Agricultural University unified identity uses the SUDY CAS OAuth2 integration.
+
+Current production OAuth settings:
+
+```env
+OAUTH_AUTH_SERVER=https://ids.ahau.edu.cn/cas/oauth2.0
+OAUTH_CLIENT_ID=aimh
+OAUTH_REDIRECT_URI=https://ai.ahau.edu.cn/callback
+OAUTH_SCOPE=cas_get_userInfo
+OAUTH_USERINFO_ENDPOINT=https://ids.ahau.edu.cn/cas/oauth2.0/profile
+```
+
+Rules:
+
+- `OAUTH_AUTH_SERVER` is the base OAuth path only; the backend appends `/authorize` and `/accessToken`.
+- `OAUTH_USERINFO_ENDPOINT` is the full profile endpoint.
+- `OAUTH_CLIENT_SECRET` must be filled only in the server `.env`; never commit it or repeat it in replies.
+- If the production domain changes, update both `FRONTEND_ORIGIN` and `OAUTH_REDIRECT_URI`, and ask the OAuth/CAS administrator to register the exact callback URL.
+- For the current migration, public domain is `https://ai.ahau.edu.cn` and callback is `https://ai.ahau.edu.cn/callback`.
 
 ## Dify And General Model Routing
 
@@ -258,7 +281,7 @@ Production deploy:
 cd ~/aimh1-ai-portal
 git pull origin main
 docker compose up -d --build
-curl http://127.0.0.1:7998/api/health
+curl http://127.0.0.1:3000/api/health
 ```
 
 ## Recommended Next Work

@@ -4102,8 +4102,12 @@ if (fs.existsSync(distDir)) {
   };
 
   app.get(["/", "/index.html"], sendPortalIndex);
+  app.get("/admin.html", sendPortalIndex);
   app.use(express.static(distDir));
-  app.get("/admin", (_req, res) => {
+  app.get("/admin", (req, res) => {
+    if (!req.session?.user) {
+      return res.redirect("/api/auth/login");
+    }
     res.sendFile(path.join(distDir, "admin.html"));
   });
   app.get("*", (req, res, next) => {

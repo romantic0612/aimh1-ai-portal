@@ -1,6 +1,7 @@
 FROM node:20-bookworm-slim
 
 ENV NODE_ENV=production
+ENV NODE_OPTIONS=--v8-pool-size=1
 WORKDIR /app
 
 RUN npm install -g pm2@latest
@@ -12,6 +13,6 @@ COPY server ./server
 COPY dist ./dist
 COPY ecosystem.config.cjs ./ecosystem.config.cjs
 
-EXPOSE 7998
+EXPOSE 3000
 
 CMD ["pm2-runtime", "ecosystem.config.cjs", "--env", "production"]

@@ -32,7 +32,8 @@ cp server/.env.production.example .env
 Important production settings:
 
 ```env
-PORT=7998
+PORT=3000
+FRONTEND_ORIGIN=https://ai.ahau.edu.cn
 SESSION_STORE=mysql
 MYSQL_POOL_SIZE=15
 DIFY_CONNECT_TIMEOUT=15
@@ -45,12 +46,12 @@ With PM2 `instances: 10` and `DIFY_MAX_CONCURRENT=10`, the portal-side Dify conc
 
 ## Docker Deployment
 
-Target server: `210.45.177.21`
+Target server: `210.45.177.74`
 
 ```bash
 git pull origin main
 docker compose up -d --build
-curl http://127.0.0.1:7998/api/health
+curl http://127.0.0.1:3000/api/health
 ```
 
 Expected health response:
@@ -63,7 +64,9 @@ The container runs `pm2-runtime ecosystem.config.cjs --env production`, preservi
 
 ## Nginx
 
-Use `deploy/nginx/aimh1-portal.conf` as a starting point. SSH is still separate from Nginx: SSH normally uses port `22`, while Nginx serves browser traffic on `80/443`.
+Use `deploy/nginx/aimh1-portal.conf` as a starting point when Nginx runs on this server. SSH is still separate from Nginx: SSH normally uses port `22`, while Nginx/WAF serves browser traffic on `80/443`. The portal container listens on `3000`; public HTTPS traffic should enter through the campus WAF or Nginx at `https://ai.ahau.edu.cn`.
+
+If Nginx runs on the same server (`210.45.177.74`), proxy to `http://127.0.0.1:3000`. If a campus WAF/gateway on another server terminates HTTPS, ask the gateway admin to proxy `https://ai.ahau.edu.cn` to `http://210.45.177.74:3000`.
 
 The SSE endpoint `/api/chat/stream` must disable buffering:
 

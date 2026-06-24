@@ -6,7 +6,7 @@
 
 - 不直接覆盖生产 `dist/`。
 - `npm run build` 默认输出到 `frontend/dist-preview`。
-- 开发环境通过 Vite 代理访问后端 `http://127.0.0.1:7998`。
+- 开发环境通过 Vite 代理访问后端 `http://127.0.0.1:3000`。
 - 等页面和线上效果复刻稳定后，再决定是否切换生产构建输出。
 
 ## 页面
@@ -35,7 +35,7 @@ npm run build
 npm run preview
 ```
 
-后端需要先启动在 `7998`：
+后端需要先启动在 `3000`：
 
 ```bash
 cd ../server
