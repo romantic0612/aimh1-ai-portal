@@ -855,3 +855,18 @@ html.mobile-chat-frame.mobile-keyboard-open .chat-agent-switch,
 html.mobile-chat-frame.mobile-preview.mobile-keyboard-open .chat-agent-switch {
   bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
 }
+/* Keep ranking tabs visually selected on desktop, tablet, and real mobile routes. */
+.board-tabs button.active,
+html.mobile-rank .board-tabs button.active,
+html.mobile-preview.mobile-rank .board-tabs button.active {
+  background: #0d8b60 !important;
+  color: #fff !important;
+  border-color: #0d8b60 !important;
+  box-shadow: 0 8px 20px rgba(13, 139, 96, 0.16) !important;
+}
+
+.board-tabs button:not(.active),
+html.mobile-rank .board-tabs button:not(.active),
+html.mobile-preview.mobile-rank .board-tabs button:not(.active) {
+  color: #315f4f !important;
+}
