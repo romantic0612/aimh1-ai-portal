@@ -72,6 +72,35 @@ Expected health response:
 {"ok":true}
 ```
 
+### Node74 Server Notes
+
+Server `210.45.177.74` has special Docker networking constraints:
+
+- Docker version: `19.03.5`.
+- Docker bridge networking is disabled in `/etc/docker/daemon.json` with `"bridge": "none"`.
+- Docker Compose v2 is available, but `docker compose up -d --build` fails during image build with `network bridge not found`.
+- Docker `19.03.5` does not support the Compose `host-gateway` shortcut for `host.docker.internal`.
+- Build images manually with host networking:
+
+```bash
+docker build --network=host -t aimh1-ai-portal:latest .
+docker compose up -d --no-build
+```
+
+For the portal container on this server, use host networking:
+
+```yaml
+network_mode: "host"
+```
+
+With host networking, the portal can proxy AI Service Navigator through:
+
+```env
+SERVICE_PROXY_TARGET=http://127.0.0.1:3101
+```
+
+Do not switch this server back to `host.docker.internal:host-gateway` unless Docker is upgraded to a version that supports it and the deployment is retested.
+
 ## Core Capabilities
 
 The app is the Anhui Agricultural University AI portal.
