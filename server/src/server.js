@@ -159,6 +159,19 @@ const bridgeStatePrefix = "oauth-bridge.";
 const MySQLStore = MySQLStoreFactory(session);
 const difyLimiter = createAsyncLimiter(config.difyMaxConcurrent);
 
+function redirectMobileHost(req, res, next) {
+  const rawHost = String(req.headers.host || "");
+  const [hostname, port] = rawHost.split(":");
+  if (!hostname.toLowerCase().endsWith(".mobile")) {
+    next();
+    return;
+  }
+
+  const canonicalHost = hostname.slice(0, -".mobile".length);
+  const canonicalAuthority = port ? `${canonicalHost}:${port}` : canonicalHost;
+  res.redirect(301, `${req.protocol}://${canonicalAuthority}${req.originalUrl || "/"}`);
+}
+
 function createServiceProxy(target) {
   const targetUrl = new URL(target);
   const proxyClient = targetUrl.protocol === "https:" ? https : http;
@@ -2663,6 +2676,8 @@ async function tryIncreaseLoginCounter(userId) {
     return { checked: true, incremented: false, reason: error.message };
   }
 }
+
+app.use(redirectMobileHost);
 
 app.use(
   createServiceProxy(config.serviceProxyTarget)

@@ -6,6 +6,14 @@ function isMobileShellViewport() {
   return window.matchMedia("(max-width: 768px)").matches;
 }
 
+function syncResponsiveHomeRoute() {
+  if (mobileShellPath() !== "/" || !isMobileShellViewport()) return;
+  const target = new URL("/mobile", location.origin);
+  target.search = location.search;
+  target.hash = location.hash;
+  location.replace(target.pathname + target.search + target.hash);
+}
+
 function syncMobileShellClasses() {
   const path = mobileShellPath();
   const mobileChat = path === "/chat" && isMobileShellViewport();
@@ -79,6 +87,7 @@ function ensureMobileChatTopbar() {
 }
 
 function syncMobileShell() {
+  syncResponsiveHomeRoute();
   syncMobileShellClasses();
   syncInjectedTopbar();
   ensureMobileChatTopbar();
