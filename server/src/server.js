@@ -1,4 +1,6 @@
 import crypto from "crypto";
+import http from "http";
+import https from "https";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -138,6 +140,7 @@ const config = {
   difyDataAppId: process.env.DIFY_DATA_APP_ID || "14f802c8-df92-496a-a5b0-1b2bfc6dffa1",
   difyServiceChatUrl: (process.env.DIFY_SERVICE_CHAT_URL || "").replace(/\/$/, ""),
   serviceNavigatorBaseUrl: (process.env.SERVICE_NAVIGATOR_BASE_URL || "").replace(/\/$/, ""),
+  serviceProxyTarget: (process.env.SERVICE_PROXY_TARGET || "http://127.0.0.1:3101").replace(/\/$/, ""),
   serviceNavigatorTimeoutMs: Number(process.env.SERVICE_NAVIGATOR_TIMEOUT_MS || 30000),
   serviceNavigatorEnabled: (process.env.SERVICE_NAVIGATOR_ENABLED || "true").toLowerCase() !== "false",
   difyConnectTimeoutMs: Number(process.env.DIFY_CONNECT_TIMEOUT_MS || Number(process.env.DIFY_CONNECT_TIMEOUT || 15) * 1000),
@@ -155,6 +158,68 @@ const cookieSecure = (process.env.COOKIE_SECURE || "false").toLowerCase() === "t
 const bridgeStatePrefix = "oauth-bridge.";
 const MySQLStore = MySQLStoreFactory(session);
 const difyLimiter = createAsyncLimiter(config.difyMaxConcurrent);
+
+function createServiceProxy(target) {
+  const targetUrl = new URL(target);
+  const proxyClient = targetUrl.protocol === "https:" ? https : http;
+  const hopByHopHeaders = new Set([
+    "connection",
+    "keep-alive",
+    "proxy-authenticate",
+    "proxy-authorization",
+    "te",
+    "trailer",
+    "transfer-encoding",
+    "upgrade"
+  ]);
+
+  return (req, res, next) => {
+    if (!(req.path === "/service" || req.path.startsWith("/service/") || req.path.startsWith("/service-api/"))) {
+      next();
+      return;
+    }
+
+    const headers = { ...req.headers };
+    for (const header of hopByHopHeaders) delete headers[header];
+    headers.host = targetUrl.host;
+    headers["x-forwarded-host"] = req.headers.host || "";
+    headers["x-forwarded-proto"] = req.protocol || "http";
+    headers["x-forwarded-for"] = [req.headers["x-forwarded-for"], req.socket.remoteAddress]
+      .filter(Boolean)
+      .join(", ");
+
+    const proxyReq = proxyClient.request(
+      {
+        protocol: targetUrl.protocol,
+        hostname: targetUrl.hostname,
+        port: targetUrl.port || (targetUrl.protocol === "https:" ? 443 : 80),
+        method: req.method,
+        path: `${targetUrl.pathname === "/" ? "" : targetUrl.pathname}${req.originalUrl}`,
+        headers
+      },
+      (proxyRes) => {
+        res.statusCode = proxyRes.statusCode || 502;
+        for (const [header, value] of Object.entries(proxyRes.headers)) {
+          if (!hopByHopHeaders.has(header.toLowerCase()) && value !== undefined) {
+            res.setHeader(header, value);
+          }
+        }
+        proxyRes.pipe(res);
+      }
+    );
+
+    proxyReq.on("error", (error) => {
+      console.error(`[service-proxy] ${req.method} ${req.originalUrl} -> ${target}: ${error.message}`);
+      if (!res.headersSent) {
+        res.status(502).json({ ok: false, error: "AI service is unavailable" });
+      } else {
+        res.end();
+      }
+    });
+
+    req.pipe(proxyReq);
+  };
+}
 
 function validateStartupConfig() {
   const errors = [];
@@ -2598,6 +2663,10 @@ async function tryIncreaseLoginCounter(userId) {
     return { checked: true, incremented: false, reason: error.message };
   }
 }
+
+app.use(
+  createServiceProxy(config.serviceProxyTarget)
+);
 
 app.use(
   cors({
